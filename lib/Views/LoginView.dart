@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:link_shortener_mobile/Models/DTO/ErrorResponseDTO.dart';
+import 'package:link_shortener_mobile/Models/DTO/UserLoginResponseDTO.dart';
 import 'package:link_shortener_mobile/Providers/AuthProvider.dart';
 import 'package:provider/provider.dart';
 
@@ -102,28 +104,36 @@ class _LoginViewState extends State<LoginView> {
                   );
                 }
 
-                if (value.isError) {
-                  // Error
-                  return Text(
-                    value.errorDTO.error ?? 'none error',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                      color: Colors.black12,
-                    ),
-                  );
-                } else if (value.isResponse) {
+                if (!value.isResponse) {
+                  return const SizedBox();
+                }
+
+                if (value.response is UserLoginResponseDTO) {
                   return const Text(
-                    'Giriş başarılı..',
+                    'Başarıyla giriş yapıldı..',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                      color: Colors.black12,
+                      fontSize: 16,
+                      color: Colors.black54,
+                    ),
+                  );
+                } else if (value.response is ErrorResponseDTO) {
+                  return Text(
+                    (value.response as ErrorResponseDTO).error_message ?? "???",
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Colors.black54,
                     ),
                   );
                 } else {
-                  return const SizedBox(
-                    height: 0,
+                  return const Text(
+                    'Bilinmeyen bir hata meydana geldi, lütfen daha sonra tekrar deneyiniz.',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Colors.black54,
+                    ),
                   );
                 }
               })
