@@ -186,7 +186,7 @@ class LinkItem extends StatelessWidget {
                           color: colorText1),
                     ),
                     Text(
-                      url,
+                      url.length <= 30 ? url : '${url.substring(0, 30)}...',
                       style: GoogleFonts.roboto(
                           textStyle: const TextStyle(
                               fontSize: 16,
@@ -205,7 +205,7 @@ class LinkItem extends StatelessWidget {
                 ))
           ]),
         ),
-        Padding(
+        const Padding(
           padding: EdgeInsets.symmetric(horizontal: 20),
           child: Divider(
             thickness: 0.5,
