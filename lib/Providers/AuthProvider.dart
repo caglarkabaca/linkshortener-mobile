@@ -1,24 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:link_shortener_mobile/Models/DTO/ErrorResponseDTO.dart';
 import 'package:link_shortener_mobile/Providers/AuthService.dart';
+import 'package:link_shortener_mobile/Views/MainView.dart';
 
 class AuthProvider extends ChangeNotifier {
   final _service = AuthService();
 
   late dynamic _response;
+
   dynamic get response => _response;
-  var isResponse = false;
-
   bool isLoading = false;
-  Future<void> login(String userName, String password) async {
+
+  ErrorResponseDTO? errorDto;
+
+  Future<void> login(
+      BuildContext context, String userName, String password) async {
     isLoading = true;
-    isResponse = false;
     notifyListeners();
 
-    final response = await _service.loginService(userName, password);
+    final response =
+        await _service.loginService(userName, password, onError: (dto) {
+          errorDto = dto;
+        });
     _response = response;
-
     isLoading = false;
-    isResponse = true;
-    notifyListeners();
+
+    if (response != null) {
+      // token save
+      // httpbase ekle
+      // redirect sayfa
+      // return
+    } else {
+      notifyListeners();
+    }
   }
 }

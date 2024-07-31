@@ -1,9 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:link_shortener_mobile/Core/LocalStorage.dart';
 import 'package:link_shortener_mobile/Models/DTO/ErrorResponseDTO.dart';
 import 'package:link_shortener_mobile/Models/DTO/UserLoginResponseDTO.dart';
 import 'package:link_shortener_mobile/Providers/AuthProvider.dart';
+import 'package:link_shortener_mobile/Views/MainView.dart';
 import 'package:provider/provider.dart';
 
 const color1 = Color(0xffeabfff);
@@ -88,7 +90,7 @@ class _LoginViewState extends State<LoginView> {
                     final password = _passwordController.text;
                     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
                       Provider.of<AuthProvider>(context, listen: false)
-                          .login(userName, password);
+                          .login(context, userName, password);
                     });
                   }
                 },
@@ -104,22 +106,9 @@ class _LoginViewState extends State<LoginView> {
                   );
                 }
 
-                if (!value.isResponse) {
-                  return const SizedBox();
-                }
-
-                if (value.response is UserLoginResponseDTO) {
-                  return const Text(
-                    'Başarıyla giriş yapıldı..',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: Colors.black54,
-                    ),
-                  );
-                } else if (value.response is ErrorResponseDTO) {
+                if (value.errorDto != null) {
                   return Text(
-                    (value.response as ErrorResponseDTO).error_message ?? "???",
+                    (value.errorDto!).error_message ?? "???",
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
@@ -127,14 +116,16 @@ class _LoginViewState extends State<LoginView> {
                     ),
                   );
                 } else {
+                  return const SizedBox(height: 0,);
                   return const Text(
                     'Bilinmeyen bir hata meydana geldi, lütfen daha sonra tekrar deneyiniz.',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                      fontSize: 12,
                       color: Colors.black54,
                     ),
                   );
+
                 }
               })
             ]),

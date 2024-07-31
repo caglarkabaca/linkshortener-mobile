@@ -1,4 +1,4 @@
-import 'User.dart';
+import '../User.dart';
 
 class UserLoginResponseDTO {
   User? user;
