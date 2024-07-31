@@ -1,9 +1,15 @@
+import 'dart:convert';
+
+import 'package:link_shortener_mobile/Models/User.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LocalStorage {
   late SharedPreferences prefs;
+
   LocalStorage._internal();
+
   static final _instance = LocalStorage._internal();
+
   factory LocalStorage() {
     return _instance;
   }
@@ -31,4 +37,15 @@ class LocalStorage {
     return await prefs.remove('user_token');
   }
 
+  Future<User?> getUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? jsonUser = await prefs.getString('user');
+    if (jsonUser == null) return null;
+    return User.fromJson(jsonDecode(jsonUser) as Map<String, dynamic>);
+  }
+
+  Future<bool> setUser(User user) async {
+    final prefs = await SharedPreferences.getInstance();
+    return await prefs.setString('user', jsonEncode(user));
+  }
 }

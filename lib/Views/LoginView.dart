@@ -1,11 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:link_shortener_mobile/Core/LocalStorage.dart';
-import 'package:link_shortener_mobile/Models/DTO/ErrorResponseDTO.dart';
-import 'package:link_shortener_mobile/Models/DTO/UserLoginResponseDTO.dart';
 import 'package:link_shortener_mobile/Providers/AuthProvider.dart';
-import 'package:link_shortener_mobile/Views/MainView.dart';
 import 'package:provider/provider.dart';
 
 const color1 = Color(0xffeabfff);
@@ -13,24 +9,6 @@ const color2 = Color(0xff3c005a);
 const color3 = Color(0xff800080);
 const color4 = Color(0xffd580ff);
 const colorBackground = Color(0xfffff3fd);
-
-// Page = View + Provider
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
-
-  @override
-  State<LoginPage> createState() => _LoginPageState();
-}
-
-class _LoginPageState extends State<LoginPage> {
-  @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => AuthProvider(),
-      child: LoginView(),
-    );
-  }
-}
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -116,16 +94,9 @@ class _LoginViewState extends State<LoginView> {
                     ),
                   );
                 } else {
-                  return const SizedBox(height: 0,);
-                  return const Text(
-                    'Bilinmeyen bir hata meydana geldi, lütfen daha sonra tekrar deneyiniz.',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                      color: Colors.black54,
-                    ),
+                  return const SizedBox(
+                    height: 0,
                   );
-
                 }
               })
             ]),

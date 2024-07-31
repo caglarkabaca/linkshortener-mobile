@@ -18,11 +18,15 @@ class _SplashViewState extends State<SplashView> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final isToken = await LocalStorage().checkToken();
       if (isToken) {
-        Navigator.pushReplacement(context,
-            MaterialPageRoute(builder: (BuildContext context) => const MainView()));
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+                builder: (BuildContext context) => const MainView()));
       } else {
-        Navigator.pushReplacement(context,
-            MaterialPageRoute(builder: (BuildContext context) => const LoginPage()));
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+                builder: (BuildContext context) => const LoginView()));
       }
     });
   }
@@ -39,7 +43,7 @@ class _SplashViewState extends State<SplashView> {
               height: 10,
             ),
             CircularProgressIndicator(
-              backgroundColor: color3,
+              backgroundColor: Color(0xff800080),
               strokeWidth: 8,
             ),
           ],

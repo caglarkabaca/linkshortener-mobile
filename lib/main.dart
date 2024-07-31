@@ -1,8 +1,10 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:link_shortener_mobile/Views/LoginView.dart';
+import 'package:link_shortener_mobile/Providers/AuthProvider.dart';
+import 'package:link_shortener_mobile/Providers/ShortLinkProvider.dart';
 import 'package:link_shortener_mobile/Views/SplashView.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   HttpOverrides.global = new MyHttpOverrides();
@@ -15,10 +17,16 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      title: 'Link Shortener',
-      home: SplashView(),
-      routes: {},
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => AuthProvider()),
+        ChangeNotifierProvider(create: (context) => ShortLinkProvider())
+      ],
+      child: const MaterialApp(
+        title: 'Link Shortener',
+        home: SplashView(),
+        routes: {},
+      ),
     );
   }
 }

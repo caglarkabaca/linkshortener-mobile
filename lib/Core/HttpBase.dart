@@ -1,5 +1,7 @@
+import 'dart:io';
+
 import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:link_shortener_mobile/Core/LocalStorage.dart';
 
 class Httpbase {
   // singleton
@@ -11,15 +13,32 @@ class Httpbase {
     return _instance;
   }
 
-  final String BASE_URL = "https://10.0.2.2:7031";
+  final String _baseUrl = "https://10.0.2.2:7031";
+  String? _token;
+
+  // olmadı
+  void setToken(String token) {
+    _token = token;
+  }
 
   Future<http.Response> get(String? url) async {
-    return await http.get(Uri.parse('$BASE_URL$url'), headers: HeaderBuilder().build());
+    if (await LocalStorage().checkToken()) {
+      _token = await LocalStorage().getToken();
+    }
+    final headers =
+        HeaderBuilder().withJson().withHeader(_token ?? "DUMMY").build();
+    print(headers.toString());
+    return await http.get(Uri.parse('$_baseUrl$url'), headers: headers);
   }
 
   Future<http.Response> post(String? url, Object? body) async {
-    return await http.post(Uri.parse('$BASE_URL$url'),
-        headers: HeaderBuilder().withJson().build(), body: body);
+    if (await LocalStorage().checkToken()) {
+      _token = await LocalStorage().getToken();
+    }
+    final headers =
+        HeaderBuilder().withJson().withHeader(_token ?? "DUMMY").build();
+    return await http.post(Uri.parse('$_baseUrl$url'),
+        headers: headers, body: body);
   }
 }
 
@@ -27,12 +46,12 @@ class HeaderBuilder {
   final Map<String, String> _base = {"accept": "*/*"};
 
   HeaderBuilder withJson() {
-    _base['Content-Type'] = 'application/json; charset=UTF-8';
+    _base[HttpHeaders.contentTypeHeader] = 'application/json; charset=UTF-8';
     return this;
   }
 
-  HeaderBuilder withHeader() {
-    _base['Authorization'] = 'Bearer TOKEN';
+  HeaderBuilder withHeader(String token) {
+    _base[HttpHeaders.authorizationHeader] = 'Bearer ${token}';
     return this;
   }
 

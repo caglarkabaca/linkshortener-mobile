@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:link_shortener_mobile/Core/HttpBase.dart';
+import 'package:link_shortener_mobile/Core/LocalStorage.dart';
 import 'package:link_shortener_mobile/Models/DTO/ErrorResponseDTO.dart';
 import 'package:link_shortener_mobile/Providers/AuthService.dart';
 import 'package:link_shortener_mobile/Views/MainView.dart';
+import 'package:link_shortener_mobile/Views/SplashView.dart';
 
 class AuthProvider extends ChangeNotifier {
   final _service = AuthService();
@@ -20,16 +23,41 @@ class AuthProvider extends ChangeNotifier {
 
     final response =
         await _service.loginService(userName, password, onError: (dto) {
-          errorDto = dto;
-        });
+      errorDto = dto;
+    });
+
     _response = response;
     isLoading = false;
 
     if (response != null) {
-      // token save
-      // httpbase ekle
-      // redirect sayfa
-      // return
+      await LocalStorage().setToken(response.token!);
+      await LocalStorage().setUser(response.user!);
+
+      Httpbase().setToken(response.token ?? 'WTF MAN');
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (BuildContext context) => const MainView()),
+      );
+
+      return;
+    } else {
+      notifyListeners();
+    }
+  }
+
+  Future<void> logout(BuildContext context) async {
+    isLoading = true;
+    notifyListeners();
+
+    final response = await LocalStorage().clearToken();
+
+    isLoading = false;
+
+    if (response) {
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (BuildContext context) => const SplashView()));
     } else {
       notifyListeners();
     }
