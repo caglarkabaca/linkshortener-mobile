@@ -16,20 +16,23 @@ class Httpbase {
   final String _baseUrl = "https://10.0.2.2:7031";
   String? _token;
 
-  // olmadı
   void setToken(String token) {
     _token = token;
   }
 
-  Future<http.Response> get(String? url) async {
+  Future<http.Response> get(String? url, [String? query]) async {
     final headers =
         HeaderBuilder().withJson().withHeader(_token ?? "DUMMY").build();
-    return await http.get(Uri.parse('$_baseUrl$url'), headers: headers);
+    print('[GET] $_baseUrl$url${(query != null) ? query : ''}');
+    return await http.get(
+        Uri.parse('$_baseUrl$url${(query != null) ? query : ''}'),
+        headers: headers);
   }
 
   Future<http.Response> post(String? url, Object? body) async {
     final headers =
         HeaderBuilder().withJson().withHeader(_token ?? "DUMMY").build();
+    print('[POST] $_baseUrl');
     return await http.post(Uri.parse('$_baseUrl$url'),
         headers: headers, body: body);
   }
@@ -49,6 +52,19 @@ class HeaderBuilder {
   }
 
   Map<String, String> build() {
+    return _base;
+  }
+}
+
+class QueryBuilder {
+  String _base = "?";
+
+  QueryBuilder add(String key, String value) {
+    _base += '$key=$value&';
+    return this;
+  }
+
+  String build() {
     return _base;
   }
 }

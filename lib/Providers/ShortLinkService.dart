@@ -6,8 +6,30 @@ import 'package:link_shortener_mobile/Models/DTO/ShortLinksResponseDTO.dart';
 
 class ShortLinkService {
   Future<ShortLinksResponseDTO?> getUserShortLinksService(
-      {Function(ErrorResponseDTO dto)? onError}) async {
-    final response = await Httpbase().get('/ShortLink/GetAll');
+      {String? nameSearch,
+      int? page,
+      int? take,
+      String? sortBy,
+      bool? isDescending,
+      Function(ErrorResponseDTO dto)? onError}) async {
+    var queryBuilder = QueryBuilder();
+
+    var params = {
+      'nameSearch': nameSearch,
+      'page': page?.toString(),
+      'take': take?.toString(),
+      'sortBy': sortBy,
+      'isDescending': isDescending?.toString(),
+    };
+
+    params.forEach((key, value) {
+      if (value != null) {
+        queryBuilder.add(key, value);
+      }
+    });
+
+    final response =
+        await Httpbase().get('/ShortLink/GetAll', queryBuilder.build());
 
     if (response.statusCode == 200) {
       return ShortLinksResponseDTO.fromJson(
