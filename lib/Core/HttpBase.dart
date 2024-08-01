@@ -22,19 +22,12 @@ class Httpbase {
   }
 
   Future<http.Response> get(String? url) async {
-    if (await LocalStorage().checkToken()) {
-      _token = await LocalStorage().getToken();
-    }
     final headers =
         HeaderBuilder().withJson().withHeader(_token ?? "DUMMY").build();
-    print(headers.toString());
     return await http.get(Uri.parse('$_baseUrl$url'), headers: headers);
   }
 
   Future<http.Response> post(String? url, Object? body) async {
-    if (await LocalStorage().checkToken()) {
-      _token = await LocalStorage().getToken();
-    }
     final headers =
         HeaderBuilder().withJson().withHeader(_token ?? "DUMMY").build();
     return await http.post(Uri.parse('$_baseUrl$url'),

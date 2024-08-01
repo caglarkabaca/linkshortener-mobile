@@ -7,7 +7,7 @@ import 'package:link_shortener_mobile/Models/DTO/ShortLinksResponseDTO.dart';
 class ShortLinkService {
   Future<ShortLinksResponseDTO?> getUserShortLinksService(
       {Function(ErrorResponseDTO dto)? onError}) async {
-    final response = await Httpbase().get('/ShortLink/UserLinks');
+    final response = await Httpbase().get('/ShortLink/GetAll');
 
     if (response.statusCode == 200) {
       return ShortLinksResponseDTO.fromJson(

@@ -130,6 +130,7 @@ class _MainViewState extends State<MainView> {
             ),
             Expanded(
               child: ListView.builder(
+                  controller: ScrollController(),
                   itemCount: dto.shortLinks!.length,
                   itemBuilder: (BuildContext context, int index) {
                     ShortLink link = dto.shortLinks![index];
@@ -162,13 +163,13 @@ class LinkItem extends StatelessWidget {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 5),
+          padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
           child:
               Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
             Row(
               children: [
                 const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 10),
+                  padding: EdgeInsets.symmetric(horizontal: 5),
                   child: Icon(
                     Icons.link,
                     size: 32,
@@ -197,12 +198,50 @@ class LinkItem extends StatelessWidget {
                 )
               ],
             ),
-            IconButton(
-                onPressed: () {},
-                icon: const Icon(
-                  Icons.more_horiz,
-                  color: color3,
-                ))
+            // PopupMenuButton(
+            //   itemBuilder: (BuildContext context) => <PopupMenuEntry>[
+            //     PopupMenuItem(
+            //       value: "edit",
+            //       child: Row(
+            //         children: [
+            //           const Padding(
+            //             padding: EdgeInsets.symmetric(horizontal: 5),
+            //             child: Icon(Icons.edit),
+            //           ),
+            //           Text(
+            //             'Düzenle',
+            //             style: GoogleFonts.roboto(
+            //               textStyle: TextStyle(fontWeight: FontWeight.w500),
+            //             ),
+            //           ),
+            //         ],
+            //       ),
+            //     ),
+            //     PopupMenuItem(
+            //       value: "delete",
+            //       child: Row(
+            //         children: [
+            //           const Padding(
+            //             padding: EdgeInsets.symmetric(horizontal: 5),
+            //             child: Icon(Icons.delete),
+            //           ),
+            //           Text(
+            //             'Sil',
+            //             style: GoogleFonts.roboto(
+            //               textStyle: TextStyle(fontWeight: FontWeight.w500),
+            //             ),
+            //           ),
+            //         ],
+            //       ),
+            //     ),
+            //   ],
+            //   child: const CircleAvatar(
+            //     child: Icon(
+            //       Icons.info_outline,
+            //       color: color3,
+            //     ),
+            //   ),
+            // )
           ]),
         ),
         const Padding(

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:link_shortener_mobile/Core/HttpBase.dart';
 import 'package:link_shortener_mobile/Models/User.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -16,9 +17,11 @@ class LocalStorage {
 
   Future<bool> checkToken() async {
     final prefs = await SharedPreferences.getInstance();
-    if (prefs.getString('user_token') == null) {
+    var token = prefs.getString('user_token');
+    if (token == null) {
       return false;
     }
+    Httpbase().setToken(token);
     return true;
   }
 

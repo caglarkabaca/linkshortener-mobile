@@ -5,6 +5,7 @@ class ShortLink {
   String? name;
   String? redirectUrl;
   String? uniqueCode;
+  int? createdById;
   User? createdBy;
   String? createDate;
   String? updateDate;
@@ -16,6 +17,7 @@ class ShortLink {
       this.name,
       this.redirectUrl,
       this.uniqueCode,
+      this.createdById,
       this.createdBy,
       this.createDate,
       this.updateDate,
@@ -27,6 +29,7 @@ class ShortLink {
     name = json['name'];
     redirectUrl = json['redirectUrl'];
     uniqueCode = json['uniqueCode'];
+    createdById = json['createdById'];
     createdBy =
         json['createdBy'] != null ? new User.fromJson(json['createdBy']) : null;
     createDate = json['createDate'];
@@ -41,6 +44,7 @@ class ShortLink {
     data['name'] = this.name;
     data['redirectUrl'] = this.redirectUrl;
     data['uniqueCode'] = this.uniqueCode;
+    data['createdById'] = this.createdById;
     if (this.createdBy != null) {
       data['createdBy'] = this.createdBy!.toJson();
     }
