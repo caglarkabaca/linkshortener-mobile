@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
-import 'package:link_shortener_mobile/Core/LocalStorage.dart';
 
 class Httpbase {
   // singleton
@@ -14,6 +13,9 @@ class Httpbase {
   }
 
   final String _baseUrl = "https://10.0.2.2:7031";
+
+  String get baseUrl => _baseUrl;
+
   String? _token;
 
   void setToken(String token) {

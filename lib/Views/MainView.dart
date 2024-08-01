@@ -67,7 +67,6 @@ class _MainViewState extends State<MainView> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _scrollController.addListener(_onScroll);
     fetchData(refresh: false);
@@ -106,6 +105,16 @@ class _MainViewState extends State<MainView> {
               ))
         ],
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // todo ShortLink ekle sayfasına yönlendirme
+        },
+        shape: const CircleBorder(),
+        child: const Icon(
+          Icons.add_outlined,
+        ),
+      ),
       body: Consumer<ShortLinkProvider>(builder: (context, value, child) {
         // eğer refresh olduysa önceki response duruyordur gerek yok loadinge
         if (value.isLoading) {
@@ -132,7 +141,7 @@ class _MainViewState extends State<MainView> {
         final dto = value.response as ShortLinksResponseDTO;
 
         totalCount ??= dto.totalCount;
-        if (dto.page! * dto.take! >= dto.totalCount!) endOfList = true;
+        if ((dto.page! + 1) * dto.take! >= dto.totalCount!) endOfList = true;
         shortLinks.addAll(dto.shortLinks!); // listeye ekleme işlemi
 
         return Column(
@@ -140,7 +149,8 @@ class _MainViewState extends State<MainView> {
           children: [
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-              child: Column(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   InfoWidget(
                     icon: Icons.link,
@@ -163,34 +173,36 @@ class _MainViewState extends State<MainView> {
                         'Kısa Linkler',
                         style: GoogleFonts.roboto(
                             textStyle: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w400,
+                          fontSize: 32,
+                          fontWeight: FontWeight.w300,
                           color: colorText1,
                           height: 1,
                         )),
                       ),
                       SizedBox(
-                          width: 275,
-                          child: TextField(
-                            decoration: const InputDecoration(
-                                border: const UnderlineInputBorder(),
-                                hintText: 'İsim ile ara',
-                                hintStyle: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w400,
-                                  color: Colors.black38,
-                                )),
-                            onChanged: (v) {
-                              nameSearch = v;
-                              clearList();
-                              fetchData(refresh: true);
-                            },
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black54,
-                            ),
-                          )),
+                        width: 275,
+                        child: TextField(
+                          autofocus: false,
+                          decoration: const InputDecoration(
+                              border: const UnderlineInputBorder(),
+                              hintText: 'İsim ile ara',
+                              hintStyle: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w400,
+                                color: Colors.black38,
+                              )),
+                          onChanged: (v) {
+                            nameSearch = v;
+                            clearList();
+                            fetchData(refresh: true);
+                          },
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black54,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                   Row(
@@ -243,7 +255,14 @@ class _MainViewState extends State<MainView> {
                     itemBuilder: (BuildContext context, int index) {
                       ShortLink link = shortLinks[index];
                       return TextButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            WidgetsBinding.instance
+                                .addPostFrameCallback((timeStamp) {
+                              Provider.of<ShortLinkProvider>(context,
+                                      listen: false)
+                                  .getShortLinkDetails(context, link);
+                            });
+                          },
                           style: TextButton.styleFrom(
                               padding: EdgeInsets.zero,
                               shape: const RoundedRectangleBorder()),

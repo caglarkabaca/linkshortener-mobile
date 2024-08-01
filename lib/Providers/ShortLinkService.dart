@@ -2,9 +2,44 @@ import 'dart:convert';
 
 import 'package:link_shortener_mobile/Core/HttpBase.dart';
 import 'package:link_shortener_mobile/Models/DTO/ErrorResponseDTO.dart';
+import 'package:link_shortener_mobile/Models/DTO/ShortLinkLogsDTO.dart';
 import 'package:link_shortener_mobile/Models/DTO/ShortLinksResponseDTO.dart';
 
 class ShortLinkService {
+  Future<ShortLinkLogsResponseDTO?> getShortLinkLogsService(
+      {required int shortLinkId,
+      int? page,
+      int? take,
+      bool? isDescending,
+      Function(ErrorResponseDTO dto)? onError}) async {
+    var queryBuilder = QueryBuilder();
+    var params = {
+      'page': page?.toString(),
+      'take': take?.toString(),
+      'isDescending': isDescending?.toString(),
+    };
+
+    params.forEach((key, value) {
+      if (value != null) {
+        queryBuilder.add(key, value);
+      }
+    });
+
+    final response = await Httpbase()
+        .get('/ShortLinkLog/$shortLinkId', queryBuilder.build());
+
+    if (response.statusCode == 200) {
+      return ShortLinkLogsResponseDTO.fromJson(
+          jsonDecode(response.body) as Map<String, dynamic>);
+    } else {
+      if (onError != null) {
+        onError(ErrorResponseDTO.fromJson(
+            jsonDecode(response.body) as Map<String, dynamic>));
+      }
+      return null;
+    }
+  }
+
   Future<ShortLinksResponseDTO?> getUserShortLinksService(
       {String? nameSearch,
       int? page,
@@ -42,4 +77,6 @@ class ShortLinkService {
       return null;
     }
   }
+
+// todo ShortLink Silme Service
 }

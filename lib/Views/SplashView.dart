@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:link_shortener_mobile/Core/HttpBase.dart';
 import 'package:link_shortener_mobile/Core/LocalStorage.dart';
 import 'package:link_shortener_mobile/Views/LoginView.dart';
 import 'package:link_shortener_mobile/Views/MainView.dart';
@@ -14,7 +13,6 @@ class SplashView extends StatefulWidget {
 class _SplashViewState extends State<SplashView> {
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final isToken = await LocalStorage().checkToken();

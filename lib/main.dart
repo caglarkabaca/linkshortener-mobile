@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:link_shortener_mobile/Providers/AuthProvider.dart';
+import 'package:link_shortener_mobile/Providers/ShortLinkLogsProvider.dart';
 import 'package:link_shortener_mobile/Providers/ShortLinkProvider.dart';
 import 'package:link_shortener_mobile/Views/SplashView.dart';
 import 'package:provider/provider.dart';
@@ -20,7 +21,8 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => AuthProvider()),
-        ChangeNotifierProvider(create: (context) => ShortLinkProvider())
+        ChangeNotifierProvider(create: (context) => ShortLinkProvider()),
+        ChangeNotifierProvider(create: (context) => ShortLinkLogsProvider())
       ],
       child: const MaterialApp(
         title: 'Link Shortener',
