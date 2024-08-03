@@ -26,7 +26,18 @@ class Httpbase {
     final headers =
         HeaderBuilder().withJson().withHeader(_token ?? "DUMMY").build();
     print('[GET] $_baseUrl$url${(query != null) ? query : ''}');
+    print('[HEADER] $headers');
     return await http.get(
+        Uri.parse('$_baseUrl$url${(query != null) ? query : ''}'),
+        headers: headers);
+  }
+
+  Future<http.Response> delete(String? url, [String? query]) async {
+    final headers =
+        HeaderBuilder().withJson().withHeader(_token ?? "DUMMY").build();
+    print('[DELETE] $_baseUrl$url${(query != null) ? query : ''}');
+    print('[HEADER] $headers');
+    return await http.delete(
         Uri.parse('$_baseUrl$url${(query != null) ? query : ''}'),
         headers: headers);
   }
@@ -35,6 +46,7 @@ class Httpbase {
     final headers =
         HeaderBuilder().withJson().withHeader(_token ?? "DUMMY").build();
     print('[POST] $_baseUrl');
+    print('[HEADER] $headers');
     return await http.post(Uri.parse('$_baseUrl$url'),
         headers: headers, body: body);
   }

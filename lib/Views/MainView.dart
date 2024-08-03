@@ -4,10 +4,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:link_shortener_mobile/Core/Debouncer.dart';
 import 'package:link_shortener_mobile/Models/DTO/ShortLinksResponseDTO.dart';
 import 'package:link_shortener_mobile/Models/ShortLink.dart';
 import 'package:link_shortener_mobile/Providers/AuthProvider.dart';
 import 'package:link_shortener_mobile/Providers/ShortLinkProvider.dart';
+import 'package:link_shortener_mobile/Views/DetailView.dart';
 import 'package:numeral/numeral.dart';
 import 'package:provider/provider.dart';
 
@@ -37,6 +39,7 @@ class _MainViewState extends State<MainView> {
   int? totalCount;
 
   List<ShortLink> shortLinks = [];
+  Debouncer searchDebouncer = Debouncer();
 
   void clearList() {
     page = 0;
@@ -45,6 +48,8 @@ class _MainViewState extends State<MainView> {
   }
 
   void fetchData({bool? refresh}) {
+    if (nameSearch == "") totalCount = null;
+
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       Provider.of<ShortLinkProvider>(context, listen: false).getUserShortLinks(
           page: page,
@@ -74,213 +79,227 @@ class _MainViewState extends State<MainView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: colorBackground,
-      appBar: AppBar(
-        title: Text(
-          'Link Shortener',
-          style: GoogleFonts.roboto(
-            textStyle: const TextStyle(
-              fontSize: 32,
-              color: colorText1,
+    return GestureDetector(
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      child: Scaffold(
+        backgroundColor: colorBackground,
+        appBar: AppBar(
+          title: Text(
+            'Link Shortener',
+            style: GoogleFonts.roboto(
+              textStyle: const TextStyle(
+                fontSize: 32,
+                color: colorText1,
+              ),
             ),
           ),
+          actions: <Widget>[
+            IconButton(
+                onPressed: () {},
+                icon: const CircleAvatar(
+                  backgroundImage: AssetImage('assets/icon.png'),
+                )),
+            IconButton(
+                onPressed: () {
+                  WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+                    Provider.of<AuthProvider>(context, listen: false)
+                        .logout(context);
+                  });
+                },
+                icon: const Icon(
+                  Icons.logout,
+                  color: color2,
+                ))
+          ],
         ),
-        actions: <Widget>[
-          IconButton(
-              onPressed: () {},
-              icon: const CircleAvatar(
-                backgroundImage: AssetImage('assets/icon.png'),
-              )),
-          IconButton(
-              onPressed: () {
-                WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-                  Provider.of<AuthProvider>(context, listen: false)
-                      .logout(context);
-                });
-              },
-              icon: const Icon(
-                Icons.logout,
-                color: color2,
-              ))
-        ],
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // todo ShortLink ekle sayfasına yönlendirme
-        },
-        shape: const CircleBorder(),
-        child: const Icon(
-          Icons.add_outlined,
-        ),
-      ),
-      body: Consumer<ShortLinkProvider>(builder: (context, value, child) {
-        // eğer refresh olduysa önceki response duruyordur gerek yok loadinge
-        if (value.isLoading) {
-          return const Center(
-            child: CircularProgressIndicator(
-              backgroundColor: color3,
-              strokeWidth: 8,
-            ),
-          );
-        }
-
-        if (value.errorDto != null) {
-          final error = value.errorDto!.error_message;
-          return Center(
-            child: Text(
-              'Bir hata meydana geldi\n$error',
-              textAlign: TextAlign.center,
-              style:
-                  GoogleFonts.roboto(textStyle: const TextStyle(fontSize: 24)),
-            ),
-          );
-        }
-
-        final dto = value.response as ShortLinksResponseDTO;
-
-        totalCount ??= dto.totalCount;
-        if ((dto.page! + 1) * dto.take! >= dto.totalCount!) endOfList = true;
-        shortLinks.addAll(dto.shortLinks!); // listeye ekleme işlemi
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  InfoWidget(
-                    icon: Icons.link,
-                    countText: '$totalCount',
-                    infoText: 'Oluşturulan Link Sayısı',
-                    iconEnd: true,
-                  ),
-                ],
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () {
+            // todo ShortLink ekle sayfasına yönlendirme
+          },
+          label: const Row(
+            children: [
+              Icon(
+                Icons.add_outlined,
               ),
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 15),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Kısa Linkler',
-                        style: GoogleFonts.roboto(
-                            textStyle: const TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.w300,
-                          color: colorText1,
-                          height: 1,
-                        )),
-                      ),
-                      SizedBox(
-                        width: 275,
-                        child: TextField(
-                          autofocus: false,
-                          decoration: const InputDecoration(
-                              border: const UnderlineInputBorder(),
-                              hintText: 'İsim ile ara',
-                              hintStyle: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w400,
-                                color: Colors.black38,
-                              )),
-                          onChanged: (v) {
-                            nameSearch = v;
-                            clearList();
-                            fetchData(refresh: true);
-                          },
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black54,
+              Text('Oluştur')
+            ],
+          ),
+        ),
+        body: Consumer<ShortLinkProvider>(builder: (context, value, child) {
+          // eğer refresh olduysa önceki response duruyordur gerek yok loadinge
+          if (value.isLoading) {
+            return const Center(
+              child: CircularProgressIndicator(
+                backgroundColor: color3,
+                strokeWidth: 8,
+              ),
+            );
+          }
+
+          if (value.errorDto != null) {
+            final error = value.errorDto!.error_message;
+            return Center(
+              child: Text(
+                'Bir hata meydana geldi\n$error',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.roboto(
+                    textStyle: const TextStyle(fontSize: 24)),
+              ),
+            );
+          }
+
+          final dto = value.response as ShortLinksResponseDTO;
+
+          totalCount ??= dto.totalCount;
+          if ((dto.page! + 1) * dto.take! >= dto.totalCount!) endOfList = true;
+          shortLinks.addAll(dto.shortLinks!); // listeye ekleme işlemi
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    InfoWidget(
+                      icon: Icons.link,
+                      countText: '$totalCount',
+                      infoText: 'Oluşturulan Link Sayısı',
+                      iconEnd: true,
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 15),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Kısa Linkler',
+                          style: GoogleFonts.roboto(
+                              textStyle: const TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.w300,
+                            color: colorText1,
+                            height: 1,
+                          )),
+                        ),
+                        SizedBox(
+                          width: 275,
+                          child: TextField(
+                            autofocus: false,
+                            decoration: const InputDecoration(
+                                border: const UnderlineInputBorder(),
+                                hintText: 'İsim ile ara',
+                                hintStyle: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w400,
+                                  color: Colors.black38,
+                                )),
+                            onChanged: (v) {
+                              nameSearch = v;
+                              clearList();
+                              searchDebouncer
+                                  .debounce(() => fetchData(refresh: true));
+                            },
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black54,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      DropdownIconButton(
-                        onSelect: (value) {
-                          sortBy = value;
-                          clearList();
-                          fetchData(refresh: true);
-                        },
-                        items: const {
-                          'name': ('İsme göre', null),
-                          'click': ('Tıklanma sayısına göre', null),
-                          'id': ('Oluşturulma tarihine göre', null)
-                        },
-                        iconData: Icons.sort,
-                      ),
-                      DropdownIconButton(
-                        onSelect: (value) {
-                          if (value == 'inc') {
-                            isDescending = false;
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        DropdownIconButton(
+                          onSelect: (value) {
+                            sortBy = value;
                             clearList();
                             fetchData(refresh: true);
-                          } else if (value == 'desc') {
-                            isDescending = true;
-                            clearList();
-                            fetchData(refresh: true);
-                          }
-                        },
-                        items: const {
-                          'inc': ('Artan sırayla', null),
-                          'desc': ('Azalan sırayla', null)
-                        },
-                        iconData: Icons.format_line_spacing,
-                      )
-                    ],
-                  )
-                ],
-              ),
-            ),
-            const Divider(
-              color: color2,
-            ),
-            Expanded(
-              child: RefreshIndicator(
-                child: ListView.builder(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    controller: _scrollController,
-                    itemCount: shortLinks.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      ShortLink link = shortLinks[index];
-                      return TextButton(
-                          onPressed: () {
-                            WidgetsBinding.instance
-                                .addPostFrameCallback((timeStamp) {
-                              Provider.of<ShortLinkProvider>(context,
-                                      listen: false)
-                                  .getShortLinkDetails(context, link);
-                            });
                           },
-                          style: TextButton.styleFrom(
-                              padding: EdgeInsets.zero,
-                              shape: const RoundedRectangleBorder()),
-                          child: LinkItem(
-                            name: link.name! + ' #${link.id!}',
-                            url: link.redirectUrl!,
-                            count: link.clickCount!,
-                          ));
-                    }),
-                onRefresh: () async {
-                  clearList();
-                  fetchData(refresh: true);
-                },
+                          items: const {
+                            'name': ('İsme göre', null),
+                            'click': ('Tıklanma sayısına göre', null),
+                            'id': ('Oluşturulma tarihine göre', null)
+                          },
+                          iconData: Icons.sort,
+                        ),
+                        DropdownIconButton(
+                          onSelect: (value) {
+                            if (value == 'inc') {
+                              isDescending = false;
+                              clearList();
+                              fetchData(refresh: true);
+                            } else if (value == 'desc') {
+                              isDescending = true;
+                              clearList();
+                              fetchData(refresh: true);
+                            }
+                          },
+                          items: const {
+                            'inc': ('Artan sırayla', null),
+                            'desc': ('Azalan sırayla', null)
+                          },
+                          iconData: Icons.format_line_spacing,
+                        )
+                      ],
+                    )
+                  ],
+                ),
               ),
-            ),
-          ],
-        );
-      }),
+              const Divider(
+                color: color2,
+              ),
+              Expanded(
+                child: RefreshIndicator(
+                  child: ListView.builder(
+                      padding: EdgeInsets.only(bottom: 75),
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      controller: _scrollController,
+                      itemCount: shortLinks.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        ShortLink link = shortLinks[index];
+                        return TextButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (BuildContext context) =>
+                                      DetailView(link: link),
+                                ),
+                              ).whenComplete(() {
+                                clearList();
+                                fetchData(refresh: false);
+                              });
+                            },
+                            style: TextButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                                shape: const RoundedRectangleBorder()),
+                            child: LinkItem(
+                              name: link.name! + ' #${link.id!}',
+                              url: link.redirectUrl!,
+                              count: link.clickCount!,
+                            ));
+                      }),
+                  onRefresh: () async {
+                    clearList();
+                    fetchData(refresh: true);
+                  },
+                ),
+              ),
+            ],
+          );
+        }),
+      ),
     );
   }
 }

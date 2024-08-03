@@ -88,7 +88,7 @@ class _DetailViewState extends State<DetailView> {
       backgroundColor: colorBackground,
       appBar: AppBar(
         title: Text(
-          'Link Shortener',
+          'Kısa Link Raporu',
           style: GoogleFonts.roboto(
             textStyle: const TextStyle(
               fontSize: 32,
@@ -96,24 +96,6 @@ class _DetailViewState extends State<DetailView> {
             ),
           ),
         ),
-        actions: <Widget>[
-          IconButton(
-              onPressed: () {},
-              icon: const CircleAvatar(
-                backgroundImage: AssetImage('assets/icon.png'),
-              )),
-          IconButton(
-              onPressed: () {
-                WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-                  Provider.of<AuthProvider>(context, listen: false)
-                      .logout(context);
-                });
-              },
-              icon: const Icon(
-                Icons.logout,
-                color: color2,
-              ))
-        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
@@ -137,6 +119,10 @@ class _DetailViewState extends State<DetailView> {
           );
           if (dialog == true) {
             // todo Providerdan Silme işlemi yaptır
+            WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+              Provider.of<ShortLinkProvider>(context, listen: false)
+                  .deleteShortLink(context, widget.link.id!);
+            });
           }
         },
         shape: const CircleBorder(),

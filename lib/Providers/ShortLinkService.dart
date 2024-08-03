@@ -79,4 +79,18 @@ class ShortLinkService {
   }
 
 // todo ShortLink Silme Service
+
+  Future<bool> deleteShortLinkService(
+      {required int linkId, Function(ErrorResponseDTO dto)? onError}) async {
+    final response = await Httpbase().delete('/ShortLink/$linkId');
+    if (response.statusCode == 200) {
+      return true;
+    } else {
+      if (onError != null) {
+        onError(ErrorResponseDTO.fromJson(
+            jsonDecode(response.body) as Map<String, dynamic>));
+      }
+      return false;
+    }
+  }
 }

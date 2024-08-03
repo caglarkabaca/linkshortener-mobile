@@ -42,18 +42,24 @@ class ShortLinkProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> getShortLinkDetails(
-    BuildContext context,
-    ShortLink link,
-  ) async {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (BuildContext context) => DetailView(link: link),
-      ),
-    );
-    return;
-  }
-
 // todo ShortLink Silme Provider
+
+  Future<void> deleteShortLink(BuildContext context, int linkId) async {
+    isLoading = true;
+    notifyListeners();
+
+    final response = await _service.deleteShortLinkService(
+        linkId: linkId,
+        onError: (dto) {
+          errorDto = dto;
+        });
+
+    if (response == true) {
+      Navigator.pop(context);
+    } else {
+      _response = response;
+      isLoading = false;
+      notifyListeners();
+    }
+  }
 }

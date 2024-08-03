@@ -29,7 +29,7 @@ class ShortLinkLogsProvider extends ChangeNotifier {
     final response = await _service.getShortLinkLogsService(
         shortLinkId: shortLinkId,
         page: page,
-        take: take,
+        take: 10,
         isDescending: isDescending,
         onError: (dto) {
           errorDto = dto;
