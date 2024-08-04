@@ -22,7 +22,8 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (context) => AuthProvider()),
         ChangeNotifierProvider(create: (context) => ShortLinkProvider()),
-        ChangeNotifierProvider(create: (context) => ShortLinkLogsProvider())
+        ChangeNotifierProvider(create: (context) => ShortLinkLogsProvider()),
+        ChangeNotifierProvider(create: (context) => ShortLinkCreateProvider()),
       ],
       child: const MaterialApp(
         title: 'Link Shortener',

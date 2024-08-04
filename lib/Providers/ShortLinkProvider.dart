@@ -42,8 +42,6 @@ class ShortLinkProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-// todo ShortLink Silme Provider
-
   Future<void> deleteShortLink(BuildContext context, int linkId) async {
     isLoading = true;
     notifyListeners();
@@ -61,5 +59,43 @@ class ShortLinkProvider extends ChangeNotifier {
       isLoading = false;
       notifyListeners();
     }
+  }
+}
+
+class ShortLinkCreateProvider extends ChangeNotifier {
+  final _service = ShortLinkService();
+  dynamic _response;
+
+  dynamic get response => _response;
+  bool isLoading = false;
+  ErrorResponseDTO? errorDto;
+
+  Future<void> createShortLink(BuildContext context, String name,
+      String redirectLink, String? uniqueCode) async {
+    isLoading = true;
+    notifyListeners();
+
+    final response = await _service.createShortLinkService(
+        name: name,
+        redirectLink: redirectLink,
+        uniqueCode: uniqueCode,
+        onError: (dto) {
+          errorDto = dto;
+        });
+
+    if (response == true) {
+      Navigator.pop(context);
+    } else {
+      _response = response;
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> resetState(BuildContext context) async {
+    isLoading = false;
+    errorDto = null;
+    _response = null;
+    notifyListeners();
   }
 }

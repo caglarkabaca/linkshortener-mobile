@@ -10,6 +10,7 @@ import 'package:link_shortener_mobile/Models/ShortLink.dart';
 import 'package:link_shortener_mobile/Providers/AuthProvider.dart';
 import 'package:link_shortener_mobile/Providers/ShortLinkProvider.dart';
 import 'package:link_shortener_mobile/Views/DetailView.dart';
+import 'package:link_shortener_mobile/Views/LoginView.dart';
 import 'package:numeral/numeral.dart';
 import 'package:provider/provider.dart';
 
@@ -114,9 +115,64 @@ class _MainViewState extends State<MainView> {
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         floatingActionButton: FloatingActionButton.extended(
-          onPressed: () {
-            // todo ShortLink ekle sayfasına yönlendirme
-          },
+          onPressed: () => showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            builder: (BuildContext context) {
+              final nameController = TextEditingController();
+              final redirectLinkController = TextEditingController();
+              final uniqueCodeController = TextEditingController();
+              final formKey = GlobalKey<FormState>();
+
+              return SingleChildScrollView(
+                child: Container(
+                  padding: EdgeInsets.only(
+                      bottom: MediaQuery.of(context).viewInsets.bottom),
+                  child: Padding(
+                    padding: const EdgeInsets.all(15),
+                    child: Consumer<ShortLinkCreateProvider>(
+                      builder: (context, value, child) {
+                        if (value.isLoading) {
+                          return const Center(
+                            child: CircularProgressIndicator(
+                              backgroundColor: color3,
+                              strokeWidth: 8,
+                            ),
+                          );
+                        }
+
+                        if (value.errorDto != null) {
+                          final error = value.errorDto!.error_message;
+                          return Center(
+                            child: Text(
+                              'Bir hata meydana geldi\n$error',
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.roboto(
+                                  textStyle: const TextStyle(fontSize: 24)),
+                            ),
+                          );
+                        }
+
+                        return CreateFormWidget(
+                            formKey: formKey,
+                            nameController: nameController,
+                            redirectLinkController: redirectLinkController,
+                            uniqueCodeController: uniqueCodeController,
+                            modelContext: context);
+                      },
+                    ),
+                  ),
+                ),
+              );
+            },
+          ).whenComplete(() {
+            clearList();
+            fetchData(refresh: false);
+            WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+              Provider.of<ShortLinkCreateProvider>(context, listen: false)
+                  .resetState(context);
+            });
+          }),
           label: const Row(
             children: [
               Icon(
@@ -192,7 +248,7 @@ class _MainViewState extends State<MainView> {
                           )),
                         ),
                         SizedBox(
-                          width: 275,
+                          width: 300,
                           child: TextField(
                             autofocus: false,
                             decoration: const InputDecoration(
@@ -222,32 +278,24 @@ class _MainViewState extends State<MainView> {
                       children: [
                         DropdownIconButton(
                           onSelect: (value) {
-                            sortBy = value;
+                            var splited = value.split("-");
+                            print(splited);
+                            sortBy = splited[0];
+                            if (splited[1] == 'inc') {
+                              isDescending = false;
+                            } else {
+                              isDescending = true;
+                            }
                             clearList();
                             fetchData(refresh: true);
                           },
                           items: const {
-                            'name': ('İsme göre', null),
-                            'click': ('Tıklanma sayısına göre', null),
-                            'id': ('Oluşturulma tarihine göre', null)
-                          },
-                          iconData: Icons.sort,
-                        ),
-                        DropdownIconButton(
-                          onSelect: (value) {
-                            if (value == 'inc') {
-                              isDescending = false;
-                              clearList();
-                              fetchData(refresh: true);
-                            } else if (value == 'desc') {
-                              isDescending = true;
-                              clearList();
-                              fetchData(refresh: true);
-                            }
-                          },
-                          items: const {
-                            'inc': ('Artan sırayla', null),
-                            'desc': ('Azalan sırayla', null)
+                            'click-desc': ('En fazla tıklanan', null),
+                            'click-inc': ('En az tıklanan', null),
+                            'id-desc': ('En Yeni', null),
+                            'id-inc': ('En Eski', null),
+                            'name-inc': ('Alfabeye göre [A-Z]', null),
+                            'name-desc': ('Alfabeye göre [Z-A]', null)
                           },
                           iconData: Icons.format_line_spacing,
                         )
@@ -299,6 +347,85 @@ class _MainViewState extends State<MainView> {
             ],
           );
         }),
+      ),
+    );
+  }
+}
+
+class CreateFormWidget extends StatelessWidget {
+  const CreateFormWidget(
+      {super.key,
+      required this.formKey,
+      required this.nameController,
+      required this.redirectLinkController,
+      required this.uniqueCodeController,
+      required this.modelContext});
+
+  final GlobalKey<FormState> formKey;
+  final TextEditingController nameController;
+  final TextEditingController redirectLinkController;
+  final TextEditingController uniqueCodeController;
+  final BuildContext modelContext;
+
+  @override
+  Widget build(BuildContext context) {
+    return Form(
+      key: formKey,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Logo
+            const CircleAvatar(
+              radius: 32,
+              backgroundImage: AssetImage('assets/icon.png'),
+            ),
+            const SizedBox(height: 10),
+            // Title
+            const Text(
+              'Kısa Linkinizi oluşturun',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 32,
+                color: Colors.black54,
+              ),
+            ),
+            const SizedBox(height: 20),
+            // Username field
+            InputField(controller: nameController, hintText: 'Takma Ad'),
+            const SizedBox(
+              height: 5,
+            ),
+            InputField(
+                controller: redirectLinkController,
+                hintText: 'Kısaltmak istediğiniz link'),
+            const SizedBox(
+              height: 5,
+            ),
+            InputField(
+                controller: uniqueCodeController,
+                required: false,
+                hintText: 'Özel kısa linkiniz (opsiyonel)'),
+            const SizedBox(height: 15),
+            SubmitButton(
+              text: 'Oluştur',
+              onPressed: () {
+                if (formKey.currentState!.validate()) {
+                  final name = nameController.text;
+                  final redirectLink = redirectLinkController.text;
+                  final uniqueCode = uniqueCodeController.text.length >= 1
+                      ? uniqueCodeController.text
+                      : null;
+                  WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+                    Provider.of<ShortLinkCreateProvider>(context, listen: false)
+                        .createShortLink(
+                            modelContext, name, redirectLink, uniqueCode);
+                  });
+                }
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

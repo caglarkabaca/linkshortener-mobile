@@ -118,7 +118,6 @@ class _DetailViewState extends State<DetailView> {
             ),
           );
           if (dialog == true) {
-            // todo Providerdan Silme işlemi yaptır
             WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
               Provider.of<ShortLinkProvider>(context, listen: false)
                   .deleteShortLink(context, widget.link.id!);
@@ -429,9 +428,9 @@ class DetailWidget extends StatelessWidget {
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 10),
                   child: Text(
-                    countText.length <= 14
+                    countText.length <= 13
                         ? countText
-                        : '${countText.substring(0, 14)}...',
+                        : '${countText.substring(0, 13)}...',
                     style: GoogleFonts.roboto(
                         textStyle: const TextStyle(
                             color: colorText1,

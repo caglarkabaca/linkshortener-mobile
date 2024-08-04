@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:link_shortener_mobile/Core/HttpBase.dart';
 import 'package:link_shortener_mobile/Models/DTO/ErrorResponseDTO.dart';
+import 'package:link_shortener_mobile/Models/DTO/ShortLinkCreateDTO.dart';
 import 'package:link_shortener_mobile/Models/DTO/ShortLinkLogsDTO.dart';
 import 'package:link_shortener_mobile/Models/DTO/ShortLinksResponseDTO.dart';
 
@@ -78,7 +79,26 @@ class ShortLinkService {
     }
   }
 
-// todo ShortLink Silme Service
+  Future<bool> createShortLinkService(
+      {required String name,
+      required String redirectLink,
+      required String? uniqueCode,
+      Function(ErrorResponseDTO dto)? onError}) async {
+    final response = await Httpbase().post(
+        '/ShortLink',
+        jsonEncode(ShortLinkCreateDTO(
+            name: name, redirectUrl: redirectLink, uniqueCode: uniqueCode)));
+
+    if (response.statusCode == 200) {
+      return true;
+    } else {
+      if (onError != null) {
+        onError(ErrorResponseDTO.fromJson(
+            jsonDecode(response.body) as Map<String, dynamic>));
+      }
+      return false;
+    }
+  }
 
   Future<bool> deleteShortLinkService(
       {required int linkId, Function(ErrorResponseDTO dto)? onError}) async {
