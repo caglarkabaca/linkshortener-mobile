@@ -149,7 +149,7 @@ class InputField extends StatelessWidget {
 
   final TextEditingController controller;
   final bool isPassword;
-
+  final bool autoFocus;
   final bool required;
 
   const InputField(
@@ -157,14 +157,15 @@ class InputField extends StatelessWidget {
       required this.hintText,
       required this.controller,
       this.isPassword = false,
-      this.required = true});
+      this.required = true,
+      this.autoFocus = false});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 25),
       child: TextFormField(
-        autofocus: true,
+        autofocus: autoFocus,
         validator: (value) {
           if (required == false) return null;
           if (value == null || value.isEmpty) return 'Bu alan boş olamaz.';

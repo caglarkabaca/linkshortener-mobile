@@ -392,20 +392,28 @@ class CreateFormWidget extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             // Username field
-            InputField(controller: nameController, hintText: 'Takma Ad'),
+            InputField(
+              controller: nameController,
+              hintText: 'Takma Ad',
+              autoFocus: true,
+            ),
             const SizedBox(
               height: 5,
             ),
             InputField(
-                controller: redirectLinkController,
-                hintText: 'Kısaltmak istediğiniz link'),
+              controller: redirectLinkController,
+              hintText: 'Kısaltmak istediğiniz link',
+              autoFocus: true,
+            ),
             const SizedBox(
               height: 5,
             ),
             InputField(
-                controller: uniqueCodeController,
-                required: false,
-                hintText: 'Özel kısa linkiniz (opsiyonel)'),
+              controller: uniqueCodeController,
+              required: false,
+              hintText: 'Özel kısa linkiniz (opsiyonel)',
+              autoFocus: true,
+            ),
             const SizedBox(height: 15),
             SubmitButton(
               text: 'Oluştur',
