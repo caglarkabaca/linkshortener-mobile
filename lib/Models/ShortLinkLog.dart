@@ -5,22 +5,24 @@ class ShortLinkLog {
   String? userAgent;
   String? ipAddress;
   String? headersJson;
+  bool liveLog = false;
 
-  ShortLinkLog(
-      {this.id,
-      this.shortLinkId,
-      this.redirectTime,
-      this.userAgent,
-      this.ipAddress,
-      this.headersJson});
+  ShortLinkLog({
+    this.id,
+    this.shortLinkId,
+    this.redirectTime,
+    this.userAgent,
+    this.ipAddress,
+    this.headersJson,
+  });
 
   ShortLinkLog.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    shortLinkId = json['shortLinkId'];
-    redirectTime = json['redirectTime'];
-    userAgent = json['userAgent'];
-    ipAddress = json['ipAddress'];
-    headersJson = json['headersJson'];
+    id = json['id'] ?? json['Id'];
+    shortLinkId = json['shortLinkId'] ?? json['ShortLinkId'];
+    redirectTime = json['redirectTime'] ?? json['RedirectTime'];
+    userAgent = json['userAgent'] ?? json['UserAgent'];
+    ipAddress = json['ipAddress'] ?? json['IpAddress'];
+    headersJson = json['headersJson'] ?? json['HeadersJson'];
   }
 
   Map<String, dynamic> toJson() {

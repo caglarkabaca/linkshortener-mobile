@@ -36,6 +36,7 @@ class _MainViewState extends State<MainView> {
   String sortBy = "id";
   bool endOfList = false;
   String nameSearch = "";
+  String currentOrderState = "id-desc";
 
   int? totalCount;
 
@@ -50,6 +51,14 @@ class _MainViewState extends State<MainView> {
 
   void fetchData({bool? refresh}) {
     if (nameSearch == "") totalCount = null;
+
+    var splited = currentOrderState.split("-");
+    sortBy = splited[0];
+    if (splited[1] == 'inc') {
+      isDescending = false;
+    } else {
+      isDescending = true;
+    }
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       Provider.of<ShortLinkProvider>(context, listen: false).getUserShortLinks(
@@ -132,33 +141,13 @@ class _MainViewState extends State<MainView> {
                     padding: const EdgeInsets.all(15),
                     child: Consumer<ShortLinkCreateProvider>(
                       builder: (context, value, child) {
-                        if (value.isLoading) {
-                          return const Center(
-                            child: CircularProgressIndicator(
-                              backgroundColor: color3,
-                              strokeWidth: 8,
-                            ),
-                          );
-                        }
-
-                        if (value.errorDto != null) {
-                          final error = value.errorDto!.error_message;
-                          return Center(
-                            child: Text(
-                              'Bir hata meydana geldi\n$error',
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.roboto(
-                                  textStyle: const TextStyle(fontSize: 24)),
-                            ),
-                          );
-                        }
-
                         return CreateFormWidget(
                             formKey: formKey,
                             nameController: nameController,
                             redirectLinkController: redirectLinkController,
                             uniqueCodeController: uniqueCodeController,
-                            modelContext: context);
+                            modelContext: context,
+                            shortLinkCreateProvider: value);
                       },
                     ),
                   ),
@@ -276,20 +265,13 @@ class _MainViewState extends State<MainView> {
                     ),
                     Row(
                       children: [
-                        DropdownIconButton(
+                        SortDropdownIconButton(
                           onSelect: (value) {
-                            var splited = value.split("-");
-                            print(splited);
-                            sortBy = splited[0];
-                            if (splited[1] == 'inc') {
-                              isDescending = false;
-                            } else {
-                              isDescending = true;
-                            }
+                            currentOrderState = value;
                             clearList();
                             fetchData(refresh: true);
                           },
-                          items: const {
+                          items: {
                             'click-desc': ('En fazla tıklanan', null),
                             'click-inc': ('En az tıklanan', null),
                             'id-desc': ('En Yeni', null),
@@ -298,6 +280,7 @@ class _MainViewState extends State<MainView> {
                             'name-desc': ('Alfabeye göre [Z-A]', null)
                           },
                           iconData: Icons.format_line_spacing,
+                          currentOrderState: currentOrderState,
                         )
                       ],
                     )
@@ -359,13 +342,15 @@ class CreateFormWidget extends StatelessWidget {
       required this.nameController,
       required this.redirectLinkController,
       required this.uniqueCodeController,
-      required this.modelContext});
+      required this.modelContext,
+      required this.shortLinkCreateProvider});
 
   final GlobalKey<FormState> formKey;
   final TextEditingController nameController;
   final TextEditingController redirectLinkController;
   final TextEditingController uniqueCodeController;
   final BuildContext modelContext;
+  final ShortLinkCreateProvider shortLinkCreateProvider;
 
   @override
   Widget build(BuildContext context) {
@@ -390,6 +375,26 @@ class CreateFormWidget extends StatelessWidget {
                 color: Colors.black54,
               ),
             ),
+
+            if (shortLinkCreateProvider.isLoading)
+              const Center(
+                child: CircularProgressIndicator(
+                  backgroundColor: color3,
+                  strokeWidth: 8,
+                ),
+              ),
+
+            if (shortLinkCreateProvider.errorDto != null)
+              Center(
+                child: Text(
+                  'Bir hata meydana geldi\n${shortLinkCreateProvider.errorDto!.error_message}',
+                  style: GoogleFonts.roboto(
+                    textStyle: const TextStyle(fontSize: 12),
+                    color: Colors.redAccent,
+                  ),
+                ),
+              ),
+
             const SizedBox(height: 20),
             // Username field
             InputField(
@@ -513,18 +518,23 @@ class LinkItem extends StatelessWidget {
   }
 }
 
-class DropdownIconButton extends StatelessWidget {
+class SortDropdownIconButton extends StatelessWidget {
   final Map<String, (String, IconData?)> items;
   final IconData iconData;
   final Function(dynamic)? onSelect;
+  final String currentOrderState;
 
-  DropdownIconButton(
-      {super.key, required this.items, required this.iconData, this.onSelect});
+  SortDropdownIconButton(
+      {super.key,
+      required this.items,
+      required this.iconData,
+      required this.currentOrderState,
+      this.onSelect});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 5),
       child: PopupMenuButton(
         onSelected: (v) {
           if (onSelect != null) onSelect!(v);
@@ -536,10 +546,14 @@ class DropdownIconButton extends StatelessWidget {
               value: k,
               child: Row(
                 children: [
-                  if (v.$2 != null)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 5),
-                      child: Icon(v.$2),
+                  if (k == currentOrderState)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 5),
+                      child: Icon(
+                        Icons.circle,
+                        color: color2,
+                        size: 8,
+                      ),
                     ),
                   Text(
                     v.$1,

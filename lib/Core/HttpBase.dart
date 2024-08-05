@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
+import 'package:link_shortener_mobile/Core/MainHub.dart';
 
 class Httpbase {
   // singleton
@@ -18,8 +19,9 @@ class Httpbase {
 
   String? _token;
 
-  void setToken(String token) {
+  void setToken(String token) async {
     _token = token;
+    await MainHub().Connect(token);
   }
 
   Future<http.Response> get(String? url, [String? query]) async {

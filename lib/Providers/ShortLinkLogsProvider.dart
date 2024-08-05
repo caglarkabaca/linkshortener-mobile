@@ -34,9 +34,15 @@ class ShortLinkLogsProvider extends ChangeNotifier {
         onError: (dto) {
           errorDto = dto;
         });
-
     _response = response;
     isLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> resetState(BuildContext context) async {
+    isLoading = false;
+    errorDto = null;
+    _response = null;
     notifyListeners();
   }
 }

@@ -1,10 +1,13 @@
+import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:link_shortener_mobile/Core/HttpBase.dart';
+import 'package:link_shortener_mobile/Core/MainHub.dart';
 import 'package:link_shortener_mobile/Models/DTO/ShortLinkLogsDTO.dart';
 import 'package:link_shortener_mobile/Models/ShortLink.dart';
 import 'package:link_shortener_mobile/Models/ShortLinkLog.dart';
@@ -13,6 +16,7 @@ import 'package:link_shortener_mobile/Providers/ShortLinkLogsProvider.dart';
 import 'package:link_shortener_mobile/Providers/ShortLinkProvider.dart';
 import 'package:numeral/numeral.dart';
 import 'package:provider/provider.dart';
+import 'package:signalr_netcore/hub_connection.dart';
 
 const color1 = Color(0xffeabfff);
 const color2 = Color(0xff3c005a);
@@ -23,9 +27,11 @@ const colorBackground = Color(0xfffff3fd);
 const colorText1 = Color(0xff2E384D);
 const colorText2 = Color(0xff91A1B4);
 
-String formatDate(String dateTimeString) {
+String formatDate(String? dateTimeString) {
+  if (dateTimeString == null) return "?????";
+
   DateTime dateTime = DateTime.parse(dateTimeString);
-  DateFormat formatter = DateFormat('HH:mm dd-MM-yyyy');
+  DateFormat formatter = DateFormat('HH:mm dd/MM/yyyy');
   String formattedDateTime = formatter.format(dateTime);
   return formattedDateTime;
 }
@@ -39,14 +45,18 @@ class DetailView extends StatefulWidget {
   State<DetailView> createState() => _DetailViewState();
 }
 
-class _DetailViewState extends State<DetailView> {
+class _DetailViewState extends State<DetailView>
+    with SingleTickerProviderStateMixin {
   int page = 0;
+  int newCount = 0;
   bool isDescending = true;
   bool endOfList = false;
 
-  int? totalCount;
-
   List<ShortLinkLog> shortLinkLogs = [];
+
+  late AnimationController _animationController;
+  late Animation<Color?> _colorAnimation;
+  late Animation<Color?> _colorAnimationReverse;
 
   void clearList() {
     page = 0;
@@ -78,8 +88,53 @@ class _DetailViewState extends State<DetailView> {
   @override
   void initState() {
     super.initState();
+
+    if (MainHub().hubConnection != null) {
+      MainHub().hubConnection!.on("ReceieveLog#${widget.link.id}", (log) {
+        setState(() {
+          ShortLinkLog shortLinkLog = ShortLinkLog.fromJson(
+              json.decode(log.toString())[0] as Map<String, dynamic>);
+          newCount += 1;
+          shortLinkLog.liveLog = true;
+          Future.delayed(const Duration(seconds: 4, milliseconds: 500))
+              .then((val) {
+            shortLinkLog.liveLog = false;
+          });
+          shortLinkLogs.insert(0, shortLinkLog);
+        });
+      });
+    }
+
     _scrollController.addListener(_onScroll);
+    clearList();
     fetchData(refresh: false);
+
+    // animasyonla alakalı
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 1, milliseconds: 500),
+    )..repeat(reverse: true);
+
+    _colorAnimation = ColorTween(
+      begin: Colors.red[100],
+      end: Colors.white,
+    ).animate(_animationController);
+
+    _colorAnimationReverse = ColorTween(
+      begin: Colors.white,
+      end: Colors.red[100],
+    ).animate(_animationController);
+
+    _animationController.addListener(() {
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -91,43 +146,49 @@ class _DetailViewState extends State<DetailView> {
           'Kısa Link Raporu',
           style: GoogleFonts.roboto(
             textStyle: const TextStyle(
-              fontSize: 32,
+              fontSize: 28,
               color: colorText1,
             ),
           ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          var dialog = await showDialog<bool>(
-            context: context,
-            builder: (BuildContext context) => AlertDialog(
-              title: const Text('Bu işlem geri alınamaz'),
-              content: Text(
-                  '${widget.link.name} adlı kısa linki silmek istediğinize emin misiniz?'),
-              actions: <Widget>[
-                TextButton(
-                  onPressed: () => Navigator.pop(context, false),
-                  child: const Text('Hayır'),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.pop(context, true),
-                  child: const Text('Evet'),
-                ),
-              ],
-            ),
-          );
-          if (dialog == true) {
-            WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-              Provider.of<ShortLinkProvider>(context, listen: false)
-                  .deleteShortLink(context, widget.link.id!);
-            });
-          }
-        },
-        shape: const CircleBorder(),
-        child: const Icon(
-          Icons.delete,
-        ),
+        actions: [
+          IconButton(
+              onPressed: () async {
+                var dialog = await showDialog<bool>(
+                  context: context,
+                  builder: (BuildContext context) => AlertDialog(
+                    title: const Text('Bu işlem geri alınamaz'),
+                    content: Text(
+                        '${widget.link.name} adlı kısa linki silmek istediğinize emin misiniz?'),
+                    actions: <Widget>[
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        child: const Text('Hayır'),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, true),
+                        child: const Text('Evet'),
+                      ),
+                    ],
+                  ),
+                );
+                if (dialog == true) {
+                  WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+                    Provider.of<ShortLinkProvider>(context, listen: false)
+                        .deleteShortLink(context, widget.link.id!);
+                  });
+                }
+              },
+              icon: Icon(Icons.delete)),
+          if (MainHub().hubConnection != null)
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 15),
+              child: Icon(
+                Icons.live_tv_rounded,
+                color: Colors.redAccent,
+              ),
+            )
+        ],
       ),
       body: SafeArea(
         child: Column(
@@ -160,7 +221,7 @@ class _DetailViewState extends State<DetailView> {
                 uniqueCode: widget.link.uniqueCode!,
                 createdDate: widget.link.createDate!,
                 updateDate: widget.link.updateDate!,
-                clickCount: widget.link.clickCount!,
+                clickCount: widget.link.clickCount! + newCount,
               );
             }),
             const Padding(
@@ -192,20 +253,40 @@ class _DetailViewState extends State<DetailView> {
                 );
               }
 
-              final dto = value.response as ShortLinkLogsResponseDTO;
-              if ((dto.page! + 1) * dto.take! >= dto.totalCount!)
-                endOfList = true;
-              shortLinkLogs.addAll(dto.shortLinkLogs!);
+              if (value.response != null) {
+                final dto = value.response as ShortLinkLogsResponseDTO;
+                if ((dto.page! + 1) * dto.take! >= dto.totalCount!)
+                  endOfList = true;
+                shortLinkLogs.addAll(dto.shortLinkLogs!);
+
+                WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+                  Provider.of<ShortLinkLogsProvider>(context, listen: false)
+                      .resetState(context);
+                });
+              }
 
               return Expanded(
                 child: ListView.builder(
-                    shrinkWrap: true,
-                    controller: _scrollController,
-                    itemCount: shortLinkLogs.length,
-                    itemBuilder: (context, index) {
-                      final log = shortLinkLogs[index];
-                      return LogItemWidget(log: log);
-                    }),
+                  shrinkWrap: true,
+                  controller: _scrollController,
+                  itemCount: shortLinkLogs.length,
+                  itemBuilder: (context, index) {
+                    final log = shortLinkLogs[index];
+                    return AnimatedBuilder(
+                      animation: _colorAnimation,
+                      builder: (context, child) {
+                        return Container(
+                          color: (log.liveLog)
+                              ? (log.id! % 2 == 0)
+                                  ? _colorAnimation.value
+                                  : _colorAnimationReverse.value
+                              : Colors.white,
+                          child: LogItemWidget(log: log),
+                        );
+                      },
+                    );
+                  },
+                ),
               );
             })
           ],
@@ -245,7 +326,7 @@ class LogItemWidget extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Giriş tarihi: ${formatDate(log.redirectTime!)}',
+                      'Giriş tarihi: ${formatDate(log.redirectTime)}',
                       style: GoogleFonts.roboto(
                           textStyle: const TextStyle(fontSize: 18),
                           height: 1.2,
@@ -254,7 +335,8 @@ class LogItemWidget extends StatelessWidget {
                     Text(
                       ('${log.ipAddress}/${log.userAgent}'.length <= 30)
                           ? '${log.ipAddress}/${log.userAgent}'
-                          : '${log.ipAddress}/${log.userAgent}'.substring(30),
+                          : '${log.ipAddress}/${log.userAgent}'
+                              .substring(0, 30),
                       style: GoogleFonts.roboto(
                           textStyle: const TextStyle(
                               fontSize: 14,
@@ -303,23 +385,42 @@ class InfoSectionWidget extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            name,
-            style: GoogleFonts.roboto(
-                textStyle: const TextStyle(
-                    color: colorText1,
-                    fontSize: 48,
-                    fontWeight: FontWeight.w300,
-                    height: 1)),
-          ),
-          Text(
-            redirectUrl,
-            style: GoogleFonts.roboto(
-                textStyle: const TextStyle(
-                    color: Colors.black54,
-                    fontSize: 18,
-                    fontStyle: FontStyle.italic,
-                    fontWeight: FontWeight.w500)),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
+                    style: GoogleFonts.roboto(
+                        textStyle: const TextStyle(
+                            color: colorText1,
+                            fontSize: 48,
+                            fontWeight: FontWeight.w300,
+                            height: 1)),
+                  ),
+                  Text(
+                    (redirectUrl.length < 25)
+                        ? redirectUrl
+                        : redirectUrl.substring(0, 25),
+                    style: GoogleFonts.roboto(
+                        textStyle: const TextStyle(
+                            color: Colors.black54,
+                            fontSize: 18,
+                            fontStyle: FontStyle.italic,
+                            fontWeight: FontWeight.w500)),
+                  ),
+                ],
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 10),
+                child: DetailWidget(
+                    countText: clickCount.numeral(digits: 0),
+                    infoText: "Tıklanma Sayısı",
+                    icon: Icons.ads_click_outlined),
+              )
+            ],
           ),
           Padding(
             padding: EdgeInsets.symmetric(vertical: 20),
@@ -348,7 +449,7 @@ class InfoSectionWidget extends StatelessWidget {
                 Padding(
                   padding: EdgeInsets.only(top: 10),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Column(
                         children: [
@@ -376,13 +477,6 @@ class InfoSectionWidget extends StatelessWidget {
                           ),
                         ],
                       ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 10),
-                        child: DetailWidget(
-                            countText: clickCount.numeral(digits: 0),
-                            infoText: "Tıklanma Sayısı",
-                            icon: Icons.ads_click_outlined),
-                      )
                     ],
                   ),
                 ),
