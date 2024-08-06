@@ -1,9 +1,6 @@
 import 'dart:convert';
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:link_shortener_mobile/Core/HttpBase.dart';
@@ -11,21 +8,10 @@ import 'package:link_shortener_mobile/Core/MainHub.dart';
 import 'package:link_shortener_mobile/Models/DTO/ShortLinkLogsDTO.dart';
 import 'package:link_shortener_mobile/Models/ShortLink.dart';
 import 'package:link_shortener_mobile/Models/ShortLinkLog.dart';
-import 'package:link_shortener_mobile/Providers/AuthProvider.dart';
 import 'package:link_shortener_mobile/Providers/ShortLinkLogsProvider.dart';
 import 'package:link_shortener_mobile/Providers/ShortLinkProvider.dart';
 import 'package:numeral/numeral.dart';
 import 'package:provider/provider.dart';
-import 'package:signalr_netcore/hub_connection.dart';
-
-const color1 = Color(0xffeabfff);
-const color2 = Color(0xff3c005a);
-const color3 = Color(0xff800080);
-const color4 = Color(0xffd580ff);
-const colorBackground = Color(0xfffff3fd);
-
-const colorText1 = Color(0xff2E384D);
-const colorText2 = Color(0xff91A1B4);
 
 String formatDate(String? dateTimeString) {
   if (dateTimeString == null) return "?????";
@@ -140,15 +126,12 @@ class _DetailViewState extends State<DetailView>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: colorBackground,
       appBar: AppBar(
         title: Text(
           'Kısa Link Raporu',
-          style: GoogleFonts.roboto(
-            textStyle: const TextStyle(
-              fontSize: 28,
-              color: colorText1,
-            ),
+          style: TextStyle(
+            fontSize: 28,
+            color: Theme.of(context).colorScheme.primary,
           ),
         ),
         actions: [
@@ -157,15 +140,20 @@ class _DetailViewState extends State<DetailView>
                 var dialog = await showDialog<bool>(
                   context: context,
                   builder: (BuildContext context) => AlertDialog(
-                    title: const Text('Bu işlem geri alınamaz'),
+                    title: Text(
+                      'Bu işlem geri alınamaz',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
                     content: Text(
                         '${widget.link.name} adlı kısa linki silmek istediğinize emin misiniz?'),
                     actions: <Widget>[
-                      TextButton(
+                      FilledButton(
                         onPressed: () => Navigator.pop(context, false),
                         child: const Text('Hayır'),
                       ),
-                      TextButton(
+                      FilledButton(
                         onPressed: () => Navigator.pop(context, true),
                         child: const Text('Evet'),
                       ),
@@ -179,7 +167,10 @@ class _DetailViewState extends State<DetailView>
                   });
                 }
               },
-              icon: Icon(Icons.delete)),
+              icon: Icon(
+                Icons.delete,
+                color: Theme.of(context).colorScheme.primary,
+              )),
           if (MainHub().hubConnection != null)
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 15),
@@ -197,7 +188,6 @@ class _DetailViewState extends State<DetailView>
               if (value.isLoading) {
                 return const Center(
                   child: CircularProgressIndicator(
-                    backgroundColor: color3,
                     strokeWidth: 8,
                   ),
                 );
@@ -209,8 +199,7 @@ class _DetailViewState extends State<DetailView>
                   child: Text(
                     'Bir hata meydana geldi\n$error',
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.roboto(
-                        textStyle: const TextStyle(fontSize: 24)),
+                    style: const TextStyle(fontSize: 24),
                   ),
                 );
               }
@@ -224,18 +213,29 @@ class _DetailViewState extends State<DetailView>
                 clickCount: widget.link.clickCount! + newCount,
               );
             }),
+            Container(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 15),
+                child: Text(
+                  'Kayıtlar',
+                  style: TextStyle(
+                    fontSize: 32,
+                    color: Theme.of(context).colorScheme.secondaryFixed,
+                  ),
+                ),
+              ),
+            ),
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 10),
               child: Divider(
                 thickness: 0.7,
-                color: colorText1,
               ),
             ),
             Consumer<ShortLinkLogsProvider>(builder: (context, value, child) {
               if (value.isLoading) {
                 return const Center(
                   child: CircularProgressIndicator(
-                    backgroundColor: color3,
                     strokeWidth: 8,
                   ),
                 );
@@ -281,7 +281,29 @@ class _DetailViewState extends State<DetailView>
                                   ? _colorAnimation.value
                                   : _colorAnimationReverse.value
                               : Colors.white,
-                          child: LogItemWidget(log: log),
+                          // child: LogItemWidget(log: log),
+                          child: ListTile(
+                            title: Text(
+                              'Giriş tarihi: ${formatDate(log.redirectTime)}',
+                              style: const TextStyle(
+                                fontSize: 16,
+                              ),
+                            ),
+                            subtitle: Text(
+                              ('${log.ipAddress}/${log.userAgent}'.length <= 30)
+                                  ? '${log.ipAddress}/${log.userAgent}'
+                                  : '${log.ipAddress}/${log.userAgent}'
+                                      .substring(0, 30),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Theme.of(context).colorScheme.tertiary,
+                              ),
+                            ),
+                            leading: const Icon(
+                              Icons.login,
+                              size: 28,
+                            ),
+                          ),
                         );
                       },
                     );
@@ -319,7 +341,6 @@ class LogItemWidget extends StatelessWidget {
                   child: Icon(
                     Icons.login,
                     size: 32,
-                    color: color3,
                   ),
                 ),
                 Column(
@@ -328,9 +349,9 @@ class LogItemWidget extends StatelessWidget {
                     Text(
                       'Giriş tarihi: ${formatDate(log.redirectTime)}',
                       style: GoogleFonts.roboto(
-                          textStyle: const TextStyle(fontSize: 18),
-                          height: 1.2,
-                          color: colorText1),
+                        textStyle: const TextStyle(fontSize: 18),
+                        height: 1.2,
+                      ),
                     ),
                     Text(
                       ('${log.ipAddress}/${log.userAgent}'.length <= 30)
@@ -339,9 +360,7 @@ class LogItemWidget extends StatelessWidget {
                               .substring(0, 30),
                       style: GoogleFonts.roboto(
                           textStyle: const TextStyle(
-                              fontSize: 14,
-                              color: colorText2,
-                              fontStyle: FontStyle.italic)),
+                              fontSize: 14, fontStyle: FontStyle.italic)),
                     )
                   ],
                 )
@@ -353,7 +372,6 @@ class LogItemWidget extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: 20),
           child: Divider(
             thickness: 0.15,
-            color: colorText2,
           ),
         )
       ],
@@ -393,23 +411,21 @@ class InfoSectionWidget extends StatelessWidget {
                 children: [
                   Text(
                     name,
-                    style: GoogleFonts.roboto(
-                        textStyle: const TextStyle(
-                            color: colorText1,
-                            fontSize: 48,
-                            fontWeight: FontWeight.w300,
-                            height: 1)),
+                    style: TextStyle(
+                      fontSize: 36,
+                      color: Theme.of(context).colorScheme.primary,
+                      height: 1,
+                    ),
                   ),
                   Text(
                     (redirectUrl.length < 25)
                         ? redirectUrl
-                        : redirectUrl.substring(0, 25),
-                    style: GoogleFonts.roboto(
-                        textStyle: const TextStyle(
-                            color: Colors.black54,
-                            fontSize: 18,
-                            fontStyle: FontStyle.italic,
-                            fontWeight: FontWeight.w500)),
+                        : "${redirectUrl.substring(0, 25)}...",
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Theme.of(context).colorScheme.secondaryFixed,
+                      fontStyle: FontStyle.italic,
+                    ),
                   ),
                 ],
               ),
@@ -441,44 +457,6 @@ class InfoSectionWidget extends StatelessWidget {
                         },
                         icon: const Icon(Icons.copy))
                   ],
-                ),
-                const Divider(
-                  thickness: 0.6,
-                  color: colorText1,
-                ),
-                Padding(
-                  padding: EdgeInsets.only(top: 10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Column(
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text(
-                                "Oluşturulma Tarihi",
-                                style: GoogleFonts.roboto(
-                                    textStyle: const TextStyle(
-                                        decoration: TextDecoration.underline,
-                                        color: colorText1,
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.w300)),
-                              ),
-                              Text(
-                                formatDate(createdDate),
-                                style: GoogleFonts.roboto(
-                                    textStyle: const TextStyle(
-                                        color: colorText2,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w500)),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
                 ),
               ],
             ),
@@ -517,7 +495,7 @@ class DetailWidget extends StatelessWidget {
                   Icon(
                     icon,
                     size: 24,
-                    color: color2,
+                    color: Theme.of(context).colorScheme.primaryContainer,
                   ),
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 10),
@@ -525,30 +503,27 @@ class DetailWidget extends StatelessWidget {
                     countText.length <= 13
                         ? countText
                         : '${countText.substring(0, 13)}...',
-                    style: GoogleFonts.roboto(
-                        textStyle: const TextStyle(
-                            color: colorText1,
-                            fontSize: 36,
-                            fontWeight: FontWeight.w300,
-                            height: 1)),
+                    style: TextStyle(
+                        fontSize: 36,
+                        height: 1,
+                        color: Theme.of(context).colorScheme.primaryContainer),
                   ),
                 ),
                 if (iconEnd)
                   Icon(
                     icon,
                     size: 24,
-                    color: color2,
+                    color: Theme.of(context).colorScheme.primaryContainer,
                   ),
               ],
             ),
             if (infoText != null)
               Text(
                 infoText!,
-                style: GoogleFonts.roboto(
-                    textStyle: const TextStyle(
-                        color: Colors.black54,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w300)),
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Theme.of(context).colorScheme.secondaryFixed,
+                ),
               ),
           ],
         ),

@@ -43,7 +43,6 @@ class _SplashViewState extends State<SplashView> {
               height: 10,
             ),
             CircularProgressIndicator(
-              backgroundColor: Color(0xff800080),
               strokeWidth: 8,
             ),
           ],

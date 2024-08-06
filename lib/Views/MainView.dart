@@ -14,15 +14,6 @@ import 'package:link_shortener_mobile/Views/LoginView.dart';
 import 'package:numeral/numeral.dart';
 import 'package:provider/provider.dart';
 
-const color1 = Color(0xffeabfff);
-const color2 = Color(0xff3c005a);
-const color3 = Color(0xff800080);
-const color4 = Color(0xffd580ff);
-const colorBackground = Color(0xfffff3fd);
-
-const colorText1 = Color(0xff2E384D);
-const colorText2 = Color(0xff91A1B4);
-
 class MainView extends StatefulWidget {
   const MainView({super.key});
 
@@ -92,15 +83,12 @@ class _MainViewState extends State<MainView> {
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
-        backgroundColor: colorBackground,
         appBar: AppBar(
           title: Text(
             'Link Shortener',
-            style: GoogleFonts.roboto(
-              textStyle: const TextStyle(
-                fontSize: 32,
-                color: colorText1,
-              ),
+            style: TextStyle(
+              fontSize: 32,
+              color: Theme.of(context).colorScheme.primary,
             ),
           ),
           actions: <Widget>[
@@ -118,7 +106,6 @@ class _MainViewState extends State<MainView> {
                 },
                 icon: const Icon(
                   Icons.logout,
-                  color: color2,
                 ))
           ],
         ),
@@ -176,7 +163,6 @@ class _MainViewState extends State<MainView> {
           if (value.isLoading) {
             return const Center(
               child: CircularProgressIndicator(
-                backgroundColor: color3,
                 strokeWidth: 8,
               ),
             );
@@ -188,8 +174,7 @@ class _MainViewState extends State<MainView> {
               child: Text(
                 'Bir hata meydana geldi\n$error',
                 textAlign: TextAlign.center,
-                style: GoogleFonts.roboto(
-                    textStyle: const TextStyle(fontSize: 24)),
+                style: const TextStyle(fontSize: 24),
               ),
             );
           }
@@ -228,26 +213,19 @@ class _MainViewState extends State<MainView> {
                       children: [
                         Text(
                           'Kısa Linkler',
-                          style: GoogleFonts.roboto(
-                              textStyle: const TextStyle(
+                          style: TextStyle(
                             fontSize: 32,
-                            fontWeight: FontWeight.w300,
-                            color: colorText1,
-                            height: 1,
-                          )),
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
                         ),
                         SizedBox(
                           width: 300,
                           child: TextField(
                             autofocus: false,
                             decoration: const InputDecoration(
-                                border: const UnderlineInputBorder(),
-                                hintText: 'İsim ile ara',
-                                hintStyle: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w400,
-                                  color: Colors.black38,
-                                )),
+                              border: const UnderlineInputBorder(),
+                              hintText: 'İsim ile ara',
+                            ),
                             onChanged: (v) {
                               nameSearch = v;
                               clearList();
@@ -256,40 +234,32 @@ class _MainViewState extends State<MainView> {
                             },
                             style: const TextStyle(
                               fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black54,
                             ),
                           ),
                         ),
                       ],
                     ),
-                    Row(
-                      children: [
-                        SortDropdownIconButton(
-                          onSelect: (value) {
-                            currentOrderState = value;
-                            clearList();
-                            fetchData(refresh: true);
-                          },
-                          items: {
-                            'click-desc': ('En fazla tıklanan', null),
-                            'click-inc': ('En az tıklanan', null),
-                            'id-desc': ('En Yeni', null),
-                            'id-inc': ('En Eski', null),
-                            'name-inc': ('Alfabeye göre [A-Z]', null),
-                            'name-desc': ('Alfabeye göre [Z-A]', null)
-                          },
-                          iconData: Icons.format_line_spacing,
-                          currentOrderState: currentOrderState,
-                        )
-                      ],
+                    SortDropdownIconButton(
+                      onSelect: (value) {
+                        currentOrderState = value;
+                        clearList();
+                        fetchData(refresh: true);
+                      },
+                      items: const {
+                        'click-desc': ('En fazla tıklanan', null),
+                        'click-inc': ('En az tıklanan', null),
+                        'id-desc': ('En Yeni', null),
+                        'id-inc': ('En Eski', null),
+                        'name-inc': ('Alfabeye göre [A-Z]', null),
+                        'name-desc': ('Alfabeye göre [Z-A]', null)
+                      },
+                      iconData: Icons.format_line_spacing,
+                      currentOrderState: currentOrderState,
                     )
                   ],
                 ),
               ),
-              const Divider(
-                color: color2,
-              ),
+              const Divider(),
               Expanded(
                 child: RefreshIndicator(
                   child: ListView.builder(
@@ -300,26 +270,49 @@ class _MainViewState extends State<MainView> {
                       itemBuilder: (BuildContext context, int index) {
                         ShortLink link = shortLinks[index];
                         return TextButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (BuildContext context) =>
-                                      DetailView(link: link),
-                                ),
-                              ).whenComplete(() {
-                                clearList();
-                                fetchData(refresh: false);
-                              });
-                            },
-                            style: TextButton.styleFrom(
-                                padding: EdgeInsets.zero,
-                                shape: const RoundedRectangleBorder()),
-                            child: LinkItem(
-                              name: link.name! + ' #${link.id!}',
-                              url: link.redirectUrl!,
-                              count: link.clickCount!,
-                            ));
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (BuildContext context) =>
+                                    DetailView(link: link),
+                              ),
+                            ).whenComplete(() {
+                              clearList();
+                              fetchData(refresh: false);
+                            });
+                          },
+                          style: TextButton.styleFrom(
+                              padding: EdgeInsets.zero,
+                              shape: const RoundedRectangleBorder()),
+                          child: ListTile(
+                            title: Text(
+                              link.name!,
+                              style: const TextStyle(
+                                fontSize: 20,
+                              ),
+                            ),
+                            subtitle: Text(
+                              link.redirectUrl!,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Theme.of(context).colorScheme.tertiary,
+                              ),
+                            ),
+                            leading: const Icon(
+                              Icons.link,
+                              size: 28,
+                            ),
+                            trailing: Text(
+                              link.clickCount.toString(),
+                              style: TextStyle(
+                                  fontSize: 18,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .secondaryFixed),
+                            ),
+                          ),
+                        );
                       }),
                   onRefresh: () async {
                     clearList();
@@ -370,16 +363,13 @@ class CreateFormWidget extends StatelessWidget {
             const Text(
               'Kısa Linkinizi oluşturun',
               style: TextStyle(
-                fontWeight: FontWeight.bold,
                 fontSize: 32,
-                color: Colors.black54,
               ),
             ),
 
             if (shortLinkCreateProvider.isLoading)
               const Center(
                 child: CircularProgressIndicator(
-                  backgroundColor: color3,
                   strokeWidth: 8,
                 ),
               ),
@@ -387,11 +377,8 @@ class CreateFormWidget extends StatelessWidget {
             if (shortLinkCreateProvider.errorDto != null)
               Center(
                 child: Text(
-                  'Bir hata meydana geldi\n${shortLinkCreateProvider.errorDto!.error_message}',
-                  style: GoogleFonts.roboto(
-                    textStyle: const TextStyle(fontSize: 12),
-                    color: Colors.redAccent,
-                  ),
+                  textAlign: TextAlign.center,
+                  '${shortLinkCreateProvider.errorDto!.error_message}',
                 ),
               ),
 
@@ -467,7 +454,6 @@ class LinkItem extends StatelessWidget {
                   child: Icon(
                     Icons.link,
                     size: 32,
-                    color: color3,
                   ),
                 ),
                 Column(
@@ -476,17 +462,15 @@ class LinkItem extends StatelessWidget {
                     Text(
                       name.length <= 30 ? name : '${name.substring(0, 30)}...',
                       style: GoogleFonts.roboto(
-                          textStyle: const TextStyle(fontSize: 26),
-                          height: 1.2,
-                          color: colorText1),
+                        textStyle: const TextStyle(fontSize: 26),
+                        height: 1.2,
+                      ),
                     ),
                     Text(
                       url.length <= 30 ? url : '${url.substring(0, 30)}...',
                       style: GoogleFonts.roboto(
                           textStyle: const TextStyle(
-                              fontSize: 16,
-                              color: colorText2,
-                              fontStyle: FontStyle.italic)),
+                              fontSize: 16, fontStyle: FontStyle.italic)),
                     )
                   ],
                 )
@@ -499,9 +483,7 @@ class LinkItem extends StatelessWidget {
                     count.numeral(digits: 0),
                     style: GoogleFonts.roboto(
                         textStyle: const TextStyle(
-                            color: colorText1,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w300)),
+                            fontSize: 16, fontWeight: FontWeight.w300)),
                   ),
                 ))
           ]),
@@ -510,7 +492,6 @@ class LinkItem extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: 20),
           child: Divider(
             thickness: 0.5,
-            color: colorText1,
           ),
         )
       ],
@@ -547,18 +528,18 @@ class SortDropdownIconButton extends StatelessWidget {
               child: Row(
                 children: [
                   if (k == currentOrderState)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 5),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 5),
                       child: Icon(
                         Icons.circle,
-                        color: color2,
                         size: 8,
+                        color: Theme.of(context).colorScheme.primaryContainer,
                       ),
                     ),
                   Text(
                     v.$1,
-                    style: GoogleFonts.roboto(
-                      textStyle: const TextStyle(fontWeight: FontWeight.w500),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.primaryContainer,
                     ),
                   ),
                 ],
@@ -570,7 +551,6 @@ class SortDropdownIconButton extends StatelessWidget {
         child: CircleAvatar(
           child: Icon(
             iconData,
-            color: color3,
           ),
         ),
       ),
@@ -605,35 +585,32 @@ class InfoWidget extends StatelessWidget {
                   Icon(
                     icon,
                     size: 48,
-                    color: color2,
+                    color: Theme.of(context).colorScheme.primaryContainer,
                   ),
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 10),
                   child: Text(
                     countText,
-                    style: GoogleFonts.roboto(
-                        textStyle: const TextStyle(
-                            color: colorText1,
-                            fontSize: 56,
-                            fontWeight: FontWeight.w300,
-                            height: 1.2)),
+                    style: TextStyle(
+                        fontSize: 56,
+                        height: 1.2,
+                        color: Theme.of(context).colorScheme.primaryContainer),
                   ),
                 ),
                 if (iconEnd)
                   Icon(
                     icon,
                     size: 48,
-                    color: color2,
+                    color: Theme.of(context).colorScheme.primaryContainer,
                   ),
               ],
             ),
             Text(
               infoText,
-              style: GoogleFonts.roboto(
-                  textStyle: const TextStyle(
-                      color: Colors.black54,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600)),
+              style: TextStyle(
+                fontSize: 18,
+                color: Theme.of(context).colorScheme.secondaryFixed,
+              ),
             ),
           ],
         ),

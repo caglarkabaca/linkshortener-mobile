@@ -24,8 +24,11 @@ class _LoginViewState extends State<LoginView> {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
+    final TextTheme textTheme = theme.textTheme;
+
     return Scaffold(
-      backgroundColor: colorBackground,
       body: SafeArea(
         child: Form(
           key: _formKey,
@@ -35,17 +38,17 @@ class _LoginViewState extends State<LoginView> {
               // Logo
               const CircleAvatar(
                 radius: 64,
-                backgroundImage: AssetImage('assets/icon.png'),
+                backgroundColor: Colors.white,
+                child: CircleAvatar(
+                  backgroundImage: AssetImage('assets/icon.png'),
+                  radius: 60,
+                ),
               ),
               const SizedBox(height: 10),
               // Title
-              const Text(
+              Text(
                 'Link Shortener',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 32,
-                  color: Colors.black54,
-                ),
+                style: textTheme.displayMedium,
               ),
               const SizedBox(height: 20),
               // Username field
@@ -79,7 +82,6 @@ class _LoginViewState extends State<LoginView> {
               Consumer<AuthProvider>(builder: (context, value, child) {
                 if (value.isLoading) {
                   return const CircularProgressIndicator(
-                    backgroundColor: color3,
                     strokeWidth: 8,
                   );
                 }
@@ -90,7 +92,6 @@ class _LoginViewState extends State<LoginView> {
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
-                      color: Colors.black54,
                     ),
                   );
                 } else {
@@ -118,24 +119,20 @@ class SubmitButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: TextButton(
+      child: FilledButton(
         onPressed: onPressed,
         style: ButtonStyle(
-            backgroundColor: WidgetStateProperty.all<Color>(color2),
             shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-              RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            )),
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        )),
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 5),
+          padding: const EdgeInsets.symmetric(vertical: 10),
           child: Center(
             child: Text(
               text,
-              style: const TextStyle(
-                  fontSize: 20,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
           ),
         ),
@@ -179,10 +176,8 @@ class InputField extends StatelessWidget {
             hintStyle: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w400,
-              color: Colors.black38,
             )),
-        style: const TextStyle(
-            fontSize: 16, color: Colors.black54, fontWeight: FontWeight.w600),
+        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
       ),
     );
   }
