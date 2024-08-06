@@ -31,8 +31,7 @@ class DetailView extends StatefulWidget {
   State<DetailView> createState() => _DetailViewState();
 }
 
-class _DetailViewState extends State<DetailView>
-    with SingleTickerProviderStateMixin {
+class _DetailViewState extends State<DetailView> with TickerProviderStateMixin {
   int page = 0;
   int newCount = 0;
   bool isDescending = true;
@@ -42,7 +41,6 @@ class _DetailViewState extends State<DetailView>
 
   late AnimationController _animationController;
   late Animation<Color?> _colorAnimation;
-  late Animation<Color?> _colorAnimationReverse;
 
   void clearList() {
     page = 0;
@@ -102,13 +100,8 @@ class _DetailViewState extends State<DetailView>
     )..repeat(reverse: true);
 
     _colorAnimation = ColorTween(
-      begin: Colors.red[100],
+      begin: Colors.green[100],
       end: Colors.white,
-    ).animate(_animationController);
-
-    _colorAnimationReverse = ColorTween(
-      begin: Colors.white,
-      end: Colors.red[100],
     ).animate(_animationController);
 
     _animationController.addListener(() {
@@ -277,9 +270,7 @@ class _DetailViewState extends State<DetailView>
                       builder: (context, child) {
                         return Container(
                           color: (log.liveLog)
-                              ? (log.id! % 2 == 0)
-                                  ? _colorAnimation.value
-                                  : _colorAnimationReverse.value
+                              ? _colorAnimation.value
                               : Colors.white,
                           // child: LogItemWidget(log: log),
                           child: ListTile(

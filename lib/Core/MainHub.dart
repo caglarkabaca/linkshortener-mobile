@@ -37,5 +37,21 @@ class MainHub {
         .configureLogging(hubProtLogger)
         .build();
     await _hubConnection!.start();
+
+    _hubConnection!.onclose(({error}) {
+      print("HUBCONNECTION ONCLOSE ERROR: ${error ?? "no error"}");
+      return;
+    });
+
+    _hubConnection!.onreconnecting(({error}) {
+      print("HUBCONNECTION RECONNECTING ERROR: ${error ?? "no error"}");
+      return;
+    });
+
+    _hubConnection!.onreconnected(({connectionId}) {
+      print(
+          "HUBCONNECTION RECONNECTED CONNECTION ID: ${connectionId ?? "no id"}");
+      return;
+    });
   }
 }

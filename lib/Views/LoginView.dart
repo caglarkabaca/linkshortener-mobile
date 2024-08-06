@@ -36,20 +36,17 @@ class _LoginViewState extends State<LoginView> {
             child:
                 Column(mainAxisAlignment: MainAxisAlignment.center, children: [
               // Logo
-              const CircleAvatar(
+              CircleAvatar(
                 radius: 64,
-                backgroundColor: Colors.white,
+                backgroundColor: colorScheme.surfaceTint,
                 child: CircleAvatar(
                   backgroundImage: AssetImage('assets/icon.png'),
-                  radius: 60,
+                  radius: 62,
                 ),
               ),
               const SizedBox(height: 10),
               // Title
-              Text(
-                'Link Shortener',
-                style: textTheme.displayMedium,
-              ),
+              Text('Link Shortener', style: TextStyle(fontSize: 48)),
               const SizedBox(height: 20),
               // Username field
               InputField(
@@ -175,7 +172,6 @@ class InputField extends StatelessWidget {
             hintText: hintText,
             hintStyle: const TextStyle(
               fontSize: 16,
-              fontWeight: FontWeight.w400,
             )),
         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
       ),

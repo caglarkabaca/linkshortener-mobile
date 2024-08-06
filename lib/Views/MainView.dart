@@ -259,7 +259,6 @@ class _MainViewState extends State<MainView> {
                   ],
                 ),
               ),
-              const Divider(),
               Expanded(
                 child: RefreshIndicator(
                   child: ListView.builder(
