@@ -86,6 +86,7 @@ class _LoginViewState extends State<LoginView> {
                 if (value.errorDto != null) {
                   return Text(
                     (value.errorDto!).error_message ?? "???",
+                    textAlign: TextAlign.center,
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,

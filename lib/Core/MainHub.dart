@@ -35,7 +35,7 @@ class MainHub {
                 accessTokenFactory: () => Future.value(token),
                 logger: transportProtLogger))
         .configureLogging(hubProtLogger)
-        .build();
+        .withAutomaticReconnect(retryDelays: [500, 1000, 2000, 3000]).build();
     await _hubConnection!.start();
 
     _hubConnection!.onclose(({error}) {

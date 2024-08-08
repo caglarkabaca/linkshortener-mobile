@@ -89,35 +89,38 @@ class _DetailViewState extends State<DetailView> with TickerProviderStateMixin {
       });
     }
 
-    _scrollController.addListener(_onScroll);
-    clearList();
-    fetchData(refresh: false);
-
     // animasyonla alakalı
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 1, milliseconds: 500),
     )..repeat(reverse: true);
 
-    _colorAnimation = ColorTween(
-      begin: Colors.green[100],
-      end: Colors.white,
-    ).animate(_animationController);
-
     _animationController.addListener(() {
       setState(() {});
     });
+
+    _scrollController.addListener(_onScroll);
+    clearList();
+    fetchData(refresh: false);
   }
 
   @override
   void dispose() {
     _animationController.dispose();
     _scrollController.dispose();
+    if (MainHub().hubConnection != null) {
+      MainHub().hubConnection!.off("ReceieveLog#${widget.link.id}");
+    }
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    _colorAnimation = ColorTween(
+      begin: Colors.green[100],
+      end: Theme.of(context).colorScheme.surface,
+    ).animate(_animationController);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -271,7 +274,7 @@ class _DetailViewState extends State<DetailView> with TickerProviderStateMixin {
                         return Container(
                           color: (log.liveLog)
                               ? _colorAnimation.value
-                              : Colors.white,
+                              : Theme.of(context).colorScheme.surface,
                           // child: LogItemWidget(log: log),
                           child: ListTile(
                             title: Text(

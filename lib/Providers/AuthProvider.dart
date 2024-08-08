@@ -39,7 +39,7 @@ class AuthProvider extends ChangeNotifier {
         context,
         MaterialPageRoute(builder: (BuildContext context) => const MainView()),
       );
-
+      await resetState();
       return;
     } else {
       notifyListeners();
@@ -62,5 +62,12 @@ class AuthProvider extends ChangeNotifier {
     } else {
       notifyListeners();
     }
+  }
+
+  Future<void> resetState() async {
+    isLoading = false;
+    errorDto = null;
+    _response = null;
+    notifyListeners();
   }
 }
