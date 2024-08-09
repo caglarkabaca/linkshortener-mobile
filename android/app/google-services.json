@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "1077572309344",
+    "project_id": "linkshortener-59800",
+    "storage_bucket": "linkshortener-59800.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1077572309344:android:13acd5aed7deafab784e05",
+        "android_client_info": {
+          "package_name": "com.link.shortener.link_shortener_mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCg0daEjXNTk92pUb7LZXbXSQ8YabTj64M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1077572309344:android:12583158ec686cbc784e05",
+        "android_client_info": {
+          "package_name": "com.linkshortener_caca.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCg0daEjXNTk92pUb7LZXbXSQ8YabTj64M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

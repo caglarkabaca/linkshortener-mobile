@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:link_shortener_mobile/Core/HttpBase.dart';
 import 'package:link_shortener_mobile/Core/LocalStorage.dart';
@@ -21,6 +22,22 @@ class AuthProvider extends ChangeNotifier {
       BuildContext context, String userName, String password) async {
     isLoading = true;
     notifyListeners();
+
+    // await FirebaseAuth.instance.verifyPhoneNumber(
+    //   phoneNumber: '+90 535 4635157',
+    //   verificationCompleted: (PhoneAuthCredential credential) {
+    //     print('completed');
+    //   },
+    //   verificationFailed: (FirebaseAuthException e) {
+    //     print('failed');
+    //   },
+    //   codeSent: (String verificationId, int? resendToken) {
+    //     print('codesent');
+    //   },
+    //   codeAutoRetrievalTimeout: (String verificationId) {
+    //     print('timeout');
+    //   },
+    // );
 
     final response =
         await _service.loginService(userName, password, onError: (dto) {
