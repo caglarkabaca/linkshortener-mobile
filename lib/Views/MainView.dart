@@ -9,6 +9,7 @@ import 'package:link_shortener_mobile/Models/DTO/ShortLinksResponseDTO.dart';
 import 'package:link_shortener_mobile/Models/ShortLink.dart';
 import 'package:link_shortener_mobile/Providers/AuthProvider.dart';
 import 'package:link_shortener_mobile/Providers/ShortLinkProvider.dart';
+import 'package:link_shortener_mobile/Providers/ThemeProvider.dart';
 import 'package:link_shortener_mobile/Views/DetailView.dart';
 import 'package:link_shortener_mobile/Views/LoginView.dart';
 import 'package:numeral/numeral.dart';
@@ -93,7 +94,12 @@ class _MainViewState extends State<MainView> {
           ),
           actions: <Widget>[
             IconButton(
-                onPressed: () {},
+                onPressed: () {
+                  WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+                    Provider.of<ThemeProvider>(context, listen: false)
+                        .toggleTheme(context);
+                  });
+                },
                 icon: const CircleAvatar(
                   backgroundImage: AssetImage('assets/icon.png'),
                 )),
@@ -179,6 +185,14 @@ class _MainViewState extends State<MainView> {
             );
           }
 
+          if (value.response == null) {
+            return const Center(
+              child: CircularProgressIndicator(
+                strokeWidth: 8,
+              ),
+            );
+          }
+
           final dto = value.response as ShortLinksResponseDTO;
 
           totalCount ??= dto.totalCount;
@@ -208,19 +222,18 @@ class _MainViewState extends State<MainView> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Kısa Linkler',
-                          style: TextStyle(
-                            fontSize: 32,
-                            color: Theme.of(context).colorScheme.primary,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Kısa Linkler',
+                            style: TextStyle(
+                              fontSize: 32,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
                           ),
-                        ),
-                        SizedBox(
-                          width: 300,
-                          child: TextField(
+                          TextField(
                             autofocus: false,
                             decoration: const InputDecoration(
                               border: const UnderlineInputBorder(),
@@ -236,8 +249,8 @@ class _MainViewState extends State<MainView> {
                               fontSize: 16,
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                     SortDropdownIconButton(
                       onSelect: (value) {

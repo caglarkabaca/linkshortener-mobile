@@ -400,35 +400,41 @@ class InfoSectionWidget extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    name,
-                    style: TextStyle(
-                      fontSize: 36,
-                      color: Theme.of(context).colorScheme.primary,
-                      height: 1,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 36,
+                        color: Theme.of(context).colorScheme.primary,
+                        height: 1,
+                      ),
                     ),
-                  ),
-                  Text(
-                    (redirectUrl.length < 25)
-                        ? redirectUrl
-                        : "${redirectUrl.substring(0, 25)}...",
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Theme.of(context).colorScheme.secondaryFixed,
-                      fontStyle: FontStyle.italic,
+                    Text(
+                      (redirectUrl.length < 25)
+                          ? redirectUrl
+                          : "${redirectUrl.substring(0, 25)}...",
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Theme.of(context).colorScheme.secondaryFixed,
+                        fontStyle: FontStyle.italic,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 10),
-                child: DetailWidget(
-                    countText: clickCount.numeral(digits: 0),
-                    infoText: "Tıklanma Sayısı",
-                    icon: Icons.ads_click_outlined),
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 10),
+                  child: DetailWidget(
+                      countText: clickCount.numeral(digits: 0),
+                      infoText: "Tıklanma Sayısı",
+                      icon: Icons.ads_click_outlined),
+                ),
               )
             ],
           ),

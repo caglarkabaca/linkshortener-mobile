@@ -7,6 +7,7 @@ import 'package:intl/intl_standalone.dart';
 import 'package:link_shortener_mobile/Providers/AuthProvider.dart';
 import 'package:link_shortener_mobile/Providers/ShortLinkLogsProvider.dart';
 import 'package:link_shortener_mobile/Providers/ShortLinkProvider.dart';
+import 'package:link_shortener_mobile/Providers/ThemeProvider.dart';
 import 'package:link_shortener_mobile/Views/SplashView.dart';
 import 'package:link_shortener_mobile/theme.dart';
 import 'package:provider/provider.dart';
@@ -22,9 +23,6 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    // Retrieves the default theme for the platform
-    //TextTheme textTheme = Theme.of(context).textTheme;
-    // Use with Google Fonts package to use downloadable fonts
     TextTheme textTheme = createTextTheme(context, "Montserrat", "Nunito");
     MaterialTheme theme = MaterialTheme(textTheme);
 
@@ -34,11 +32,12 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => ShortLinkProvider()),
         ChangeNotifierProvider(create: (context) => ShortLinkLogsProvider()),
         ChangeNotifierProvider(create: (context) => ShortLinkCreateProvider()),
+        ChangeNotifierProvider(create: (context) => ThemeProvider(theme))
       ],
-      child: MaterialApp(
+      builder: (context, child) => MaterialApp(
         title: 'Link Shortener',
         home: const SplashView(),
-        theme: theme.lightMediumContrast(),
+        theme: Provider.of<ThemeProvider>(context).themeData,
       ),
     );
   }
