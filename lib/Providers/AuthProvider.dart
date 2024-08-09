@@ -4,9 +4,12 @@ import 'package:link_shortener_mobile/Core/HttpBase.dart';
 import 'package:link_shortener_mobile/Core/LocalStorage.dart';
 import 'package:link_shortener_mobile/Core/MainHub.dart';
 import 'package:link_shortener_mobile/Models/DTO/ErrorResponseDTO.dart';
+import 'package:link_shortener_mobile/Models/DTO/VerifySmsDTO.dart';
 import 'package:link_shortener_mobile/Providers/AuthService.dart';
 import 'package:link_shortener_mobile/Views/MainView.dart';
 import 'package:link_shortener_mobile/Views/SplashView.dart';
+
+import '../Views/RegisterView.dart';
 
 class AuthProvider extends ChangeNotifier {
   final _service = AuthService();
@@ -79,6 +82,62 @@ class AuthProvider extends ChangeNotifier {
     } else {
       notifyListeners();
     }
+  }
+
+  Future<void> register(BuildContext context, String email, String username,
+      String password) async {
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => SmsVerifyWidget()));
+  }
+
+  Future<void> verifyPhoneNumber(
+      BuildContext context, String phone_number) async {
+    isLoading = true;
+    notifyListeners();
+
+    await FirebaseAuth.instance.verifyPhoneNumber(
+      phoneNumber: phone_number,
+      verificationCompleted: (PhoneAuthCredential credential) {
+        print("completed");
+        _response = VerifySmsDTO(status: VerifySms.COMPLETED);
+        notifyListeners();
+      },
+      verificationFailed: (FirebaseAuthException e) {
+        print("failed");
+        _response = VerifySmsDTO(status: VerifySms.FAILED);
+        notifyListeners();
+      },
+      codeSent: (String verificationId, int? resendToken) {
+        print('codesent');
+        _response = VerifySmsDTO(status: VerifySms.CODESENT);
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => VerifyWidget(verifyId: verificationId),
+          ),
+        );
+        isLoading = false;
+        notifyListeners();
+      },
+      codeAutoRetrievalTimeout: (String verificationId) {
+        print('timeout');
+        _response = VerifySmsDTO(status: VerifySms.TIMEOUT);
+        notifyListeners();
+      },
+    );
+  }
+
+  Future<void> verifyCode(String verificationId, String code) async {
+    isLoading = true;
+    notifyListeners();
+
+    PhoneAuthCredential credential = PhoneAuthProvider.credential(
+        verificationId: verificationId, smsCode: code);
+    await FirebaseAuth.instance.signInWithCredential(credential);
+
+    isLoading = false;
+    notifyListeners();
   }
 
   Future<void> resetState() async {

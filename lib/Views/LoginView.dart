@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:link_shortener_mobile/Providers/AuthProvider.dart';
+import 'package:link_shortener_mobile/Views/RegisterView.dart';
 import 'package:provider/provider.dart';
 
 const color1 = Color(0xffeabfff);
@@ -46,7 +47,7 @@ class _LoginViewState extends State<LoginView> {
               ),
               const SizedBox(height: 10),
               // Title
-              Text('Link Shortener', style: TextStyle(fontSize: 48)),
+              Text('Link Shortener', style: TextStyle(fontSize: 36)),
               const SizedBox(height: 20),
               // Username field
               InputField(
@@ -72,6 +73,25 @@ class _LoginViewState extends State<LoginView> {
                     });
                   }
                 },
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text("Bir hesabınız yok mu?"),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const RegisterView()),
+                      );
+                    },
+                    child: Text("Hesap Oluşturun"),
+                  )
+                ],
               ),
               const SizedBox(
                 height: 20,
@@ -146,6 +166,7 @@ class InputField extends StatelessWidget {
   final bool isPassword;
   final bool autoFocus;
   final bool required;
+  final TextEditingController? matchController;
 
   const InputField(
       {super.key,
@@ -153,7 +174,8 @@ class InputField extends StatelessWidget {
       required this.controller,
       this.isPassword = false,
       this.required = true,
-      this.autoFocus = false});
+      this.autoFocus = false,
+      this.matchController});
 
   @override
   Widget build(BuildContext context) {
@@ -164,6 +186,8 @@ class InputField extends StatelessWidget {
         validator: (value) {
           if (required == false) return null;
           if (value == null || value.isEmpty) return 'Bu alan boş olamaz.';
+          if (matchController != null && matchController!.text != value)
+            return 'Şifreler uyuşmuyor';
           return null;
         },
         controller: controller,
