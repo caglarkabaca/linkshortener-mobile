@@ -23,6 +23,8 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> login(
       BuildContext context, String userName, String password) async {
+    await resetState();
+
     isLoading = true;
     notifyListeners();
 
@@ -86,12 +88,22 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> register(BuildContext context, String email, String username,
       String password) async {
+    await resetState();
+
     Navigator.push(
-        context, MaterialPageRoute(builder: (context) => SmsVerifyWidget()));
+      context,
+      MaterialPageRoute(
+        builder: (context) => SmsVerifyWidget(),
+      ),
+    ).then((value) {
+      print("EMAIL: $email, USERNAME: $username, PASSWORD: $password, PHONENUMBER: $value");
+    });
   }
 
   Future<void> verifyPhoneNumber(
       BuildContext context, String phone_number) async {
+    await resetState();
+
     isLoading = true;
     notifyListeners();
 
@@ -99,45 +111,61 @@ class AuthProvider extends ChangeNotifier {
       phoneNumber: phone_number,
       verificationCompleted: (PhoneAuthCredential credential) {
         print("completed");
-        _response = VerifySmsDTO(status: VerifySms.COMPLETED);
+        Navigator.pop(context, phone_number);
         notifyListeners();
       },
       verificationFailed: (FirebaseAuthException e) {
-        print("failed");
-        _response = VerifySmsDTO(status: VerifySms.FAILED);
+        print("failed $e");
+        _response = "Bir hata meydana geldi\nLütfen tekrar deneyiniz.";
+        isLoading = false;
         notifyListeners();
       },
       codeSent: (String verificationId, int? resendToken) {
         print('codesent');
-        _response = VerifySmsDTO(status: VerifySms.CODESENT);
+        isLoading = false;
+        notifyListeners();
 
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => VerifyWidget(verifyId: verificationId),
           ),
-        );
-        isLoading = false;
-        notifyListeners();
+        ).then((value) {
+          if (value == true) {
+            Navigator.pop(context, phone_number);
+          }
+        });
       },
       codeAutoRetrievalTimeout: (String verificationId) {
         print('timeout');
-        _response = VerifySmsDTO(status: VerifySms.TIMEOUT);
+        _response = "İstek zaman aşımına uğradı.";
+        isLoading = false;
         notifyListeners();
       },
     );
   }
 
-  Future<void> verifyCode(String verificationId, String code) async {
+  Future<void> verifyCode(
+      BuildContext context, String verificationId, String code) async {
+    await resetState();
+
     isLoading = true;
     notifyListeners();
 
     PhoneAuthCredential credential = PhoneAuthProvider.credential(
         verificationId: verificationId, smsCode: code);
-    await FirebaseAuth.instance.signInWithCredential(credential);
 
-    isLoading = false;
-    notifyListeners();
+    try {
+      await FirebaseAuth.instance.signInWithCredential(credential);
+
+      isLoading = false;
+      notifyListeners();
+      Navigator.pop(context, true);
+    } catch (e) {
+      _response = "Bir hata meydana geldi\nLütfen tekrar deneyiniz.";
+      isLoading = false;
+      notifyListeners();
+    }
   }
 
   Future<void> resetState() async {

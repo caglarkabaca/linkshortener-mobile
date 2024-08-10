@@ -196,8 +196,16 @@ class SmsVerifyWidget extends StatelessWidget {
                         ),
                       );
                     } else {
-                      return const SizedBox(
-                        height: 0,
+                      if (value.response == null)
+                        return const SizedBox();
+
+                      return Text(
+                        (value.response as String),
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
                       );
                     }
                   })
@@ -279,7 +287,7 @@ class VerifyWidget extends StatelessWidget {
                         WidgetsBinding.instance
                             .addPostFrameCallback((timeStamp) {
                           Provider.of<AuthProvider>(context, listen: false)
-                              .verifyCode(verifyId, _pinController.text);
+                              .verifyCode(context, verifyId, _pinController.text);
                         });
                       },
                     ),
@@ -300,8 +308,16 @@ class VerifyWidget extends StatelessWidget {
                           ),
                         );
                       } else {
-                        return const SizedBox(
-                          height: 0,
+                        if (value.response == null)
+                          return const SizedBox();
+
+                        return Text(
+                          (value.response as String),
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
                         );
                       }
                     })
