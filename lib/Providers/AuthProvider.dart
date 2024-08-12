@@ -28,22 +28,6 @@ class AuthProvider extends ChangeNotifier {
     isLoading = true;
     notifyListeners();
 
-    // await FirebaseAuth.instance.verifyPhoneNumber(
-    //   phoneNumber: '+90 535 4635157',
-    //   verificationCompleted: (PhoneAuthCredential credential) {
-    //     print('completed');
-    //   },
-    //   verificationFailed: (FirebaseAuthException e) {
-    //     print('failed');
-    //   },
-    //   codeSent: (String verificationId, int? resendToken) {
-    //     print('codesent');
-    //   },
-    //   codeAutoRetrievalTimeout: (String verificationId) {
-    //     print('timeout');
-    //   },
-    // );
-
     final response =
         await _service.loginService(userName, password, onError: (dto) {
       errorDto = dto;
@@ -73,6 +57,7 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     final response = await LocalStorage().clearToken();
+    await MainHub().Disconnect();
 
     isLoading = false;
 
@@ -95,19 +80,38 @@ class AuthProvider extends ChangeNotifier {
       MaterialPageRoute(
         builder: (context) => SmsVerifyWidget(),
       ),
-    ).then((value) {
-      print("EMAIL: $email, USERNAME: $username, PASSWORD: $password, PHONENUMBER: $value");
+    ).then((value) async {
+      if (value != null || value != false) {
+        isLoading = true;
+        notifyListeners();
+
+        final response = await _service
+            .registerService(username, password, email, value, onError: (dto) {
+          errorDto = dto;
+        });
+
+        if (response != null) {
+          isLoading = false;
+          notifyListeners();
+          Navigator.pop(context, response);
+        } else {
+          _response = response;
+          isLoading = false;
+          notifyListeners();
+        }
+      }
     });
   }
 
-  Future<void> verifyPhoneNumber(
-      BuildContext context, String phone_number) async {
+  Future<void> verifyPhoneNumber(BuildContext context, String phone_number,
+      {bool resend = false, int? resendToken}) async {
     await resetState();
 
     isLoading = true;
     notifyListeners();
 
     await FirebaseAuth.instance.verifyPhoneNumber(
+      forceResendingToken: resendToken,
       phoneNumber: phone_number,
       verificationCompleted: (PhoneAuthCredential credential) {
         print("completed");
@@ -125,16 +129,21 @@ class AuthProvider extends ChangeNotifier {
         isLoading = false;
         notifyListeners();
 
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => VerifyWidget(verifyId: verificationId),
-          ),
-        ).then((value) {
-          if (value == true) {
-            Navigator.pop(context, phone_number);
-          }
-        });
+        if (resend == false) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => VerifyWidget(
+                  phoneNumber: phone_number,
+                  resendToken: resendToken,
+                  verifyId: verificationId),
+            ),
+          ).then((value) {
+            if (value == true) {
+              Navigator.pop(context, phone_number);
+            }
+          });
+        }
       },
       codeAutoRetrievalTimeout: (String verificationId) {
         print('timeout');

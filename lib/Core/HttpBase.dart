@@ -14,7 +14,10 @@ class Httpbase {
   }
 
   // LOCAL ID ON ANDROID EMULATOR
-  final String _baseUrl = "https://10.0.2.2:7031";
+  //final String _baseUrl = "https://10.0.2.2:7031";
+
+  // LOCAL ID ON IOS
+  final String _baseUrl = "https://localhost:7031";
 
   // AZURE IP
   // final String _baseUrl = "https://linkshortenerf1-gke9bqhwbmgzekgp.italynorth-01.azurewebsites.net";
@@ -51,7 +54,7 @@ class Httpbase {
   Future<http.Response> post(String? url, Object? body) async {
     final headers =
         HeaderBuilder().withJson().withHeader(_token ?? "DUMMY").build();
-    print('[POST] $_baseUrl');
+    print('[POST] $_baseUrl$url');
     print('[HEADER] $headers');
     return await http.post(Uri.parse('$_baseUrl$url'),
         headers: headers, body: body);

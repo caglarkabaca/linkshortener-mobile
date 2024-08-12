@@ -54,4 +54,8 @@ class MainHub {
       return;
     });
   }
+
+  Future<void> Disconnect() async {
+    await _hubConnection!.stop();
+  }
 }

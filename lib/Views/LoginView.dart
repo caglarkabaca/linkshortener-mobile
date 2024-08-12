@@ -1,15 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:link_shortener_mobile/Models/User.dart';
 import 'package:link_shortener_mobile/Providers/AuthProvider.dart';
 import 'package:link_shortener_mobile/Views/RegisterView.dart';
 import 'package:provider/provider.dart';
-
-const color1 = Color(0xffeabfff);
-const color2 = Color(0xff3c005a);
-const color3 = Color(0xff800080);
-const color4 = Color(0xffd580ff);
-const colorBackground = Color(0xfffff3fd);
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -86,7 +81,25 @@ class _LoginViewState extends State<LoginView> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => const RegisterView()),
+                          builder: (context) => const RegisterView(),
+                        ),
+                      ).then(
+                        (user) {
+                          if (user != null) {
+                            WidgetsBinding.instance
+                                .addPostFrameCallback((timeStamp) {
+                              Provider.of<AuthProvider>(context, listen: false)
+                                  .login(context, (user as User).userName!,
+                                      (user as User).password!);
+                            });
+                          } else {
+                            WidgetsBinding.instance
+                                .addPostFrameCallback((timeStamp) {
+                              Provider.of<AuthProvider>(context, listen: false)
+                                  .resetState();
+                            });
+                          }
+                        },
                       );
                     },
                     child: Text("Hesap Oluşturun"),

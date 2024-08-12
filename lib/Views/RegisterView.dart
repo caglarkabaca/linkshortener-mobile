@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:link_shortener_mobile/Providers/AuthProvider.dart';
 import 'package:link_shortener_mobile/Views/LoginView.dart';
 import 'package:phonenumbers/phonenumbers.dart';
@@ -196,8 +195,7 @@ class SmsVerifyWidget extends StatelessWidget {
                         ),
                       );
                     } else {
-                      if (value.response == null)
-                        return const SizedBox();
+                      if (value.response == null) return const SizedBox();
 
                       return Text(
                         (value.response as String),
@@ -220,9 +218,15 @@ class SmsVerifyWidget extends StatelessWidget {
 }
 
 class VerifyWidget extends StatelessWidget {
-  VerifyWidget({required this.verifyId, super.key});
+  VerifyWidget(
+      {required this.verifyId,
+      required this.phoneNumber,
+      required this.resendToken,
+      super.key});
 
   final String verifyId;
+  final String phoneNumber;
+  final int? resendToken;
   final _pinController = TextEditingController();
 
   @override
@@ -270,7 +274,15 @@ class VerifyWidget extends StatelessWidget {
                           style: TextStyle(fontSize: 18),
                         ),
                         TextButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              WidgetsBinding.instance
+                                  .addPostFrameCallback((timeStamp) {
+                                Provider.of<AuthProvider>(context,
+                                        listen: false)
+                                    .verifyPhoneNumber(context, phoneNumber,
+                                        resendToken: resendToken, resend: true);
+                              });
+                            },
                             child: const Text(
                               "Tekrar gönder",
                               textAlign: TextAlign.center,
@@ -287,7 +299,8 @@ class VerifyWidget extends StatelessWidget {
                         WidgetsBinding.instance
                             .addPostFrameCallback((timeStamp) {
                           Provider.of<AuthProvider>(context, listen: false)
-                              .verifyCode(context, verifyId, _pinController.text);
+                              .verifyCode(
+                                  context, verifyId, _pinController.text);
                         });
                       },
                     ),
@@ -308,8 +321,7 @@ class VerifyWidget extends StatelessWidget {
                           ),
                         );
                       } else {
-                        if (value.response == null)
-                          return const SizedBox();
+                        if (value.response == null) return const SizedBox();
 
                         return Text(
                           (value.response as String),
