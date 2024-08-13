@@ -57,5 +57,6 @@ class MainHub {
 
   Future<void> Disconnect() async {
     await _hubConnection!.stop();
+    _hubConnection = null;
   }
 }

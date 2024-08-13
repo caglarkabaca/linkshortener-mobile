@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:link_shortener_mobile/Models/User.dart';
 import 'package:link_shortener_mobile/Providers/AuthProvider.dart';
 import 'package:link_shortener_mobile/Views/RegisterView.dart';
+import 'package:phonenumbers/phonenumbers.dart';
 import 'package:provider/provider.dart';
 
 class LoginView extends StatefulWidget {
@@ -18,102 +19,170 @@ class _LoginViewState extends State<LoginView> {
   final _userNameController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  final _phoneController = PhoneNumberEditingController();
+
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
 
-    return Scaffold(
-      body: SafeArea(
-        child: Form(
-          key: _formKey,
-          child: Center(
-            child:
-                Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-              // Logo
-              CircleAvatar(
-                radius: 64,
-                backgroundColor: colorScheme.surfaceTint,
-                child: const CircleAvatar(
-                  backgroundImage: AssetImage('assets/icon.png'),
-                  radius: 62,
-                ),
-              ),
-              const SizedBox(height: 10),
-              // Title
-              const Text('Link Shortener', style: TextStyle(fontSize: 36)),
-              const SizedBox(height: 20),
-              // Username field
-              InputField(
-                  controller: _userNameController,
-                  hintText: 'Kullanıcı adınız'),
-              const SizedBox(height: 5),
-              // Password field
-              InputField(
-                controller: _passwordController,
-                hintText: 'Şifreniz',
-                isPassword: true,
-              ),
-              const SizedBox(height: 15),
-              SubmitButton(
-                text: 'Giriş yap',
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    final userName = _userNameController.text;
-                    final password = _passwordController.text;
-                    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-                      Provider.of<AuthProvider>(context, listen: false)
-                          .login(context, userName, password);
-                    });
-                  }
-                },
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text("Bir hesabınız yok mu?"),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => SmsVerifyWidget(),
-                        ),
-                      ).then((value) {});
-                    },
-                    child: Text("Hesap Oluşturun"),
-                  )
-                ],
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              Consumer<AuthProvider>(builder: (context, value, child) {
-                if (value.isLoading) {
-                  return const CircularProgressIndicator(
-                    strokeWidth: 8,
-                  );
-                }
-
-                if (value.errorDto != null) {
-                  return Text(
-                    (value.errorDto!).error_message ?? "???",
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        bottomNavigationBar: const BottomAppBar(
+          color: Colors.transparent,
+          child: TabBar(
+            tabs: [
+              Tab(icon: Icon(Icons.email)),
+              Tab(icon: Icon(Icons.phone)),
+            ],
+          ),
+        ),
+        body: SafeArea(
+          child: Form(
+            key: _formKey,
+            child: Center(
+              child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Logo
+                    CircleAvatar(
+                      radius: 64,
+                      backgroundColor: colorScheme.surfaceTint,
+                      child: const CircleAvatar(
+                        backgroundImage: AssetImage('assets/icon.png'),
+                        radius: 62,
+                      ),
                     ),
-                  );
-                } else {
-                  return const SizedBox(
-                    height: 0,
-                  );
-                }
-              })
-            ]),
+                    const SizedBox(height: 10),
+                    // Title
+                    const Text('Link Shortener',
+                        style: TextStyle(fontSize: 36)),
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      height: 175,
+                      child: TabBarView(
+                        children: [
+                          // EMAİL PASSWORD LOGİN
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              InputField(
+                                  controller: _userNameController,
+                                  hintText: 'Kullanıcı adınız'),
+                              const SizedBox(height: 5),
+                              // Password field
+                              InputField(
+                                controller: _passwordController,
+                                hintText: 'Şifreniz',
+                                isPassword: true,
+                              ),
+                              const SizedBox(height: 15),
+                              SubmitButton(
+                                text: 'Giriş yap',
+                                onPressed: () {
+                                  if (_formKey.currentState!.validate()) {
+                                    final userName = _userNameController.text;
+                                    final password = _passwordController.text;
+                                    WidgetsBinding.instance
+                                        .addPostFrameCallback((timeStamp) {
+                                      Provider.of<AuthProvider>(context,
+                                              listen: false)
+                                          .login(context, userName, password);
+                                    });
+                                  }
+                                },
+                              ),
+                            ],
+                          ),
+                          // PHONE NUMBER LOGIN
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 20.0),
+                                child: PhoneNumberField(
+                                  controller: _phoneController,
+                                  countryCodeWidth: 50,
+                                  decoration: const InputDecoration(
+                                    hintText: "Telefon numaranız",
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 5),
+                              // Password field
+                              const SizedBox(height: 15),
+                              SubmitButton(
+                                text: 'Giriş yap',
+                                onPressed: () {
+                                  if (_formKey.currentState!.validate()) {
+                                    final phone_number =
+                                        _phoneController.value!.formattedNumber;
+
+                                    WidgetsBinding.instance
+                                        .addPostFrameCallback((timeStamp) {
+                                      Provider.of<AuthProvider>(context,
+                                              listen: false)
+                                          .verifyPhoneNumber(
+                                              context, phone_number,
+                                              isRegister: false);
+                                    });
+                                  }
+                                },
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text("Bir hesabınız yok mu?"),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => SmsVerifyWidget(
+                                  isRegister: true,
+                                ),
+                              ),
+                            ).then((value) {});
+                          },
+                          child: Text("Hesap Oluşturun"),
+                        )
+                      ],
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10.0),
+                      child: Consumer<AuthProvider>(
+                          builder: (context, value, child) {
+                        if (value.isLoading) {
+                          return const CircularProgressIndicator(
+                            strokeWidth: 8,
+                          );
+                        }
+
+                        if (value.errorDto != null) {
+                          return Text(
+                            (value.errorDto!).error_message ?? "???",
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          );
+                        } else {
+                          return const SizedBox(
+                            height: 0,
+                          );
+                        }
+                      }),
+                    )
+                  ]),
+            ),
           ),
         ),
       ),

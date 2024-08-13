@@ -129,10 +129,12 @@ class _RegisterViewState extends State<RegisterView> {
 
 class SmsVerifyWidget extends StatelessWidget {
   SmsVerifyWidget({
+    required this.isRegister,
     super.key,
   });
 
   final _phoneController = PhoneNumberEditingController();
+  final bool isRegister;
 
   @override
   Widget build(BuildContext context) {
@@ -184,39 +186,44 @@ class SmsVerifyWidget extends StatelessWidget {
 
                       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
                         Provider.of<AuthProvider>(context, listen: false)
-                            .verifyPhoneNumber(context, phone_number);
+                            .verifyPhoneNumber(context, phone_number,
+                                isRegister: isRegister);
                       });
                     },
                   ),
-                  Consumer<AuthProvider>(builder: (context, value, child) {
-                    if (value.isLoading) {
-                      return const CircularProgressIndicator(
-                        strokeWidth: 8,
-                      );
-                    }
+                  Padding(
+                    padding: const EdgeInsets.only(top: 10.0),
+                    child: Consumer<AuthProvider>(
+                        builder: (context, value, child) {
+                      if (value.isLoading) {
+                        return const CircularProgressIndicator(
+                          strokeWidth: 8,
+                        );
+                      }
 
-                    if (value.errorDto != null) {
-                      return Text(
-                        (value.errorDto!).error_message ?? "???",
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      );
-                    } else {
-                      if (value.response == null) return const SizedBox();
+                      if (value.errorDto != null) {
+                        return Text(
+                          (value.errorDto!).error_message ?? "???",
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        );
+                      } else {
+                        if (value.response == null) return const SizedBox();
 
-                      return Text(
-                        (value.response as String),
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      );
-                    }
-                  })
+                        return Text(
+                          (value.response as String),
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        );
+                      }
+                    }),
+                  )
                 ],
               ),
             ),
@@ -232,11 +239,13 @@ class VerifyWidget extends StatelessWidget {
       {required this.verifyId,
       required this.phoneNumber,
       required this.resendToken,
+      required this.isRegister,
       super.key});
 
   final String verifyId;
   final String phoneNumber;
   final int? resendToken;
+  final bool isRegister;
   final _pinController = TextEditingController();
 
   @override
@@ -290,7 +299,9 @@ class VerifyWidget extends StatelessWidget {
                                 Provider.of<AuthProvider>(context,
                                         listen: false)
                                     .verifyPhoneNumber(context, phoneNumber,
-                                        resendToken: resendToken, resend: true);
+                                        resendToken: resendToken,
+                                        resend: true,
+                                        isRegister: isRegister);
                               });
                             },
                             child: const Text(
@@ -314,35 +325,39 @@ class VerifyWidget extends StatelessWidget {
                         });
                       },
                     ),
-                    Consumer<AuthProvider>(builder: (context, value, child) {
-                      if (value.isLoading) {
-                        return const CircularProgressIndicator(
-                          strokeWidth: 8,
-                        );
-                      }
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10.0),
+                      child: Consumer<AuthProvider>(
+                          builder: (context, value, child) {
+                        if (value.isLoading) {
+                          return const CircularProgressIndicator(
+                            strokeWidth: 8,
+                          );
+                        }
 
-                      if (value.errorDto != null) {
-                        return Text(
-                          (value.errorDto!).error_message ?? "???",
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        );
-                      } else {
-                        if (value.response == null) return const SizedBox();
+                        if (value.errorDto != null) {
+                          return Text(
+                            (value.errorDto!).error_message ?? "???",
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          );
+                        } else {
+                          if (value.response == null) return const SizedBox();
 
-                        return Text(
-                          (value.response as String),
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        );
-                      }
-                    })
+                          return Text(
+                            (value.response as String),
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          );
+                        }
+                      }),
+                    )
                   ],
                 ),
               ),

@@ -26,9 +26,9 @@ class Httpbase {
 
   String? _token;
 
-  void setToken(String token) async {
+  void setToken(String? token) async {
     _token = token;
-    await MainHub().Connect(token);
+    if (token != null) await MainHub().Connect(token);
   }
 
   Future<http.Response> get(String? url, [String? query]) async {

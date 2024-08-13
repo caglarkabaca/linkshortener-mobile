@@ -9,6 +9,7 @@ import 'package:link_shortener_mobile/Models/DTO/VerifySmsDTO.dart';
 import 'package:link_shortener_mobile/Providers/AuthService.dart';
 import 'package:link_shortener_mobile/Views/MainView.dart';
 import 'package:link_shortener_mobile/Views/SplashView.dart';
+import 'package:provider/provider.dart';
 
 import '../Views/RegisterView.dart';
 
@@ -53,11 +54,42 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> loginWithPhone(BuildContext context, String phoneNumber) async {
+    await resetState();
+
+    isLoading = true;
+    notifyListeners();
+
+    final response =
+        await _service.loginServiceWithPhone(phoneNumber, onError: (dto) {
+      errorDto = dto;
+    });
+
+    _response = response;
+    isLoading = false;
+
+    if (response != null) {
+      await LocalStorage().setToken(response.token!);
+      await LocalStorage().setUser(response.user!);
+
+      Httpbase().setToken(response.token ?? 'WTF MAN');
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (BuildContext context) => const MainView()),
+      );
+      await resetState();
+      return;
+    } else {
+      notifyListeners();
+    }
+  }
+
   Future<void> logout(BuildContext context) async {
     isLoading = true;
     notifyListeners();
 
     final response = await LocalStorage().clearToken();
+    Httpbase().setToken(null);
     await MainHub().Disconnect();
 
     isLoading = false;
@@ -107,7 +139,7 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> verifyPhoneNumber(BuildContext context, String phone_number,
-      {bool resend = false, int? resendToken}) async {
+      {required bool isRegister, bool resend = false, int? resendToken}) async {
     await resetState();
 
     isLoading = true;
@@ -118,12 +150,19 @@ class AuthProvider extends ChangeNotifier {
       phoneNumber: phone_number,
       verificationCompleted: (PhoneAuthCredential credential) {
         print("completed");
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => RegisterView(phoneNumber: phone_number),
-          ),
-        );
+        if (isRegister) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => RegisterView(phoneNumber: phone_number),
+            ),
+          );
+        } else {
+          WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+            Provider.of<AuthProvider>(context, listen: false)
+                .loginWithPhone(context, phone_number);
+          });
+        }
         notifyListeners();
       },
       verificationFailed: (FirebaseAuthException e) {
@@ -142,18 +181,28 @@ class AuthProvider extends ChangeNotifier {
             context,
             MaterialPageRoute(
               builder: (context) => VerifyWidget(
-                  phoneNumber: phone_number,
-                  resendToken: resendToken,
-                  verifyId: verificationId),
+                phoneNumber: phone_number,
+                resendToken: resendToken,
+                verifyId: verificationId,
+                isRegister: isRegister,
+              ),
             ),
           ).then((value) {
             if (value == true) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => RegisterView(phoneNumber: phone_number),
-                ),
-              );
+              if (isRegister) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        RegisterView(phoneNumber: phone_number),
+                  ),
+                );
+              } else {
+                WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+                  Provider.of<AuthProvider>(context, listen: false)
+                      .loginWithPhone(context, phone_number);
+                });
+              }
             }
           });
         }
