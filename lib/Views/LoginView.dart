@@ -22,7 +22,6 @@ class _LoginViewState extends State<LoginView> {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
-    final TextTheme textTheme = theme.textTheme;
 
     return Scaffold(
       body: SafeArea(
@@ -35,14 +34,14 @@ class _LoginViewState extends State<LoginView> {
               CircleAvatar(
                 radius: 64,
                 backgroundColor: colorScheme.surfaceTint,
-                child: CircleAvatar(
+                child: const CircleAvatar(
                   backgroundImage: AssetImage('assets/icon.png'),
                   radius: 62,
                 ),
               ),
               const SizedBox(height: 10),
               // Title
-              Text('Link Shortener', style: TextStyle(fontSize: 36)),
+              const Text('Link Shortener', style: TextStyle(fontSize: 36)),
               const SizedBox(height: 20),
               // Username field
               InputField(
@@ -81,26 +80,9 @@ class _LoginViewState extends State<LoginView> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const RegisterView(),
+                          builder: (context) => SmsVerifyWidget(),
                         ),
-                      ).then(
-                        (user) {
-                          if (user != null) {
-                            WidgetsBinding.instance
-                                .addPostFrameCallback((timeStamp) {
-                              Provider.of<AuthProvider>(context, listen: false)
-                                  .login(context, (user as User).userName!,
-                                      (user as User).password!);
-                            });
-                          } else {
-                            WidgetsBinding.instance
-                                .addPostFrameCallback((timeStamp) {
-                              Provider.of<AuthProvider>(context, listen: false)
-                                  .resetState();
-                            });
-                          }
-                        },
-                      );
+                      ).then((value) {});
                     },
                     child: Text("Hesap Oluşturun"),
                   )

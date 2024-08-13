@@ -14,10 +14,10 @@ class Httpbase {
   }
 
   // LOCAL ID ON ANDROID EMULATOR
-  //final String _baseUrl = "https://10.0.2.2:7031";
+  final String _baseUrl = "https://10.0.2.2:7031";
 
   // LOCAL ID ON IOS
-  final String _baseUrl = "https://localhost:7031";
+  // final String _baseUrl = "https://localhost:7031";
 
   // AZURE IP
   // final String _baseUrl = "https://linkshortenerf1-gke9bqhwbmgzekgp.italynorth-01.azurewebsites.net";

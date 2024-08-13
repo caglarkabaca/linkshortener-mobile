@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:link_shortener_mobile/Models/DTO/UserRegisterRequestDTO.dart';
 import 'package:link_shortener_mobile/Providers/AuthProvider.dart';
 import 'package:link_shortener_mobile/Views/LoginView.dart';
 import 'package:phonenumbers/phonenumbers.dart';
@@ -6,7 +7,9 @@ import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:provider/provider.dart';
 
 class RegisterView extends StatefulWidget {
-  const RegisterView({super.key});
+  const RegisterView({required this.phoneNumber, super.key});
+
+  final String phoneNumber;
 
   @override
   State<RegisterView> createState() => _RegisterViewState();
@@ -78,7 +81,14 @@ class _RegisterViewState extends State<RegisterView> {
                           WidgetsBinding.instance
                               .addPostFrameCallback((timeStamp) {
                             Provider.of<AuthProvider>(context, listen: false)
-                                .register(context, email, username, password);
+                                .register(
+                              context,
+                              UserRegisterRequestDTO(
+                                  email: email,
+                                  userName: username,
+                                  password: password,
+                                  phoneNumber: widget.phoneNumber),
+                            );
                           });
                         }
                       },

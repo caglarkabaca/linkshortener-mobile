@@ -4,6 +4,7 @@ import 'package:link_shortener_mobile/Core/HttpBase.dart';
 import 'package:link_shortener_mobile/Core/LocalStorage.dart';
 import 'package:link_shortener_mobile/Core/MainHub.dart';
 import 'package:link_shortener_mobile/Models/DTO/ErrorResponseDTO.dart';
+import 'package:link_shortener_mobile/Models/DTO/UserRegisterRequestDTO.dart';
 import 'package:link_shortener_mobile/Models/DTO/VerifySmsDTO.dart';
 import 'package:link_shortener_mobile/Providers/AuthService.dart';
 import 'package:link_shortener_mobile/Views/MainView.dart';
@@ -14,7 +15,7 @@ import '../Views/RegisterView.dart';
 class AuthProvider extends ChangeNotifier {
   final _service = AuthService();
 
-  late dynamic _response;
+  dynamic _response;
 
   dynamic get response => _response;
   bool isLoading = false;
@@ -63,44 +64,46 @@ class AuthProvider extends ChangeNotifier {
 
     if (response) {
       Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-              builder: (BuildContext context) => const SplashView()));
+        context,
+        MaterialPageRoute(
+          builder: (BuildContext context) => const SplashView(),
+        ),
+      );
     } else {
       notifyListeners();
     }
   }
 
-  Future<void> register(BuildContext context, String email, String username,
-      String password) async {
+  Future<void> register(
+      BuildContext context, UserRegisterRequestDTO registerDto) async {
     await resetState();
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => SmsVerifyWidget(),
-      ),
-    ).then((value) async {
-      if (value != null || value != false) {
-        isLoading = true;
-        notifyListeners();
+    isLoading = true;
+    notifyListeners();
 
-        final response = await _service
-            .registerService(username, password, email, value, onError: (dto) {
-          errorDto = dto;
-        });
-
-        if (response != null) {
-          isLoading = false;
-          notifyListeners();
-          Navigator.pop(context, response);
-        } else {
-          _response = response;
-          isLoading = false;
-          notifyListeners();
-        }
-      }
+    final response =
+        await _service.registerService(registerDto, onError: (dto) {
+      errorDto = dto;
     });
+
+    if (response != null) {
+      isLoading = false;
+      notifyListeners();
+      Navigator.pushNamedAndRemoveUntil(context, "/", (r) => false);
+
+      await LocalStorage().setToken(response.token!);
+      await LocalStorage().setUser(response.user!);
+
+      Httpbase().setToken(response.token ?? 'WTF MAN');
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (BuildContext context) => const MainView()),
+      );
+    } else {
+      _response = response;
+      isLoading = false;
+      notifyListeners();
+    }
   }
 
   Future<void> verifyPhoneNumber(BuildContext context, String phone_number,
@@ -115,7 +118,12 @@ class AuthProvider extends ChangeNotifier {
       phoneNumber: phone_number,
       verificationCompleted: (PhoneAuthCredential credential) {
         print("completed");
-        Navigator.pop(context, phone_number);
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => RegisterView(phoneNumber: phone_number),
+          ),
+        );
         notifyListeners();
       },
       verificationFailed: (FirebaseAuthException e) {
@@ -140,7 +148,12 @@ class AuthProvider extends ChangeNotifier {
             ),
           ).then((value) {
             if (value == true) {
-              Navigator.pop(context, phone_number);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => RegisterView(phoneNumber: phone_number),
+                ),
+              );
             }
           });
         }

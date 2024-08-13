@@ -29,18 +29,14 @@ class AuthService {
     }
   }
 
-  Future<User?> registerService(
-      String userName, String password, String email, String phoneNumber,
+  Future<UserLoginResponseDTO?> registerService(
+      UserRegisterRequestDTO registerDto,
       {Function(ErrorResponseDTO dto)? onError}) async {
-    final response = await Httpbase().post(
-        '/Auth/Register',
-        jsonEncode(UserRegisterRequestDTO(
-            userName: userName,
-            password: password,
-            email: email,
-            phoneNumber: phoneNumber)));
+    final response =
+        await Httpbase().post('/Auth/Register', jsonEncode(registerDto));
     if (response.statusCode == 200) {
-      return User.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+      return UserLoginResponseDTO.fromJson(
+          jsonDecode(response.body) as Map<String, dynamic>);
     } else {
       if (onError != null) {
         onError(ErrorResponseDTO.fromJson(
