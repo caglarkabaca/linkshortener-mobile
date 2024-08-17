@@ -6,9 +6,10 @@ import 'package:link_shortener_mobile/Core/MainHub.dart';
 import 'package:link_shortener_mobile/Models/DTO/ErrorResponseDTO.dart';
 import 'package:link_shortener_mobile/Models/DTO/UserRegisterRequestDTO.dart';
 import 'package:link_shortener_mobile/Models/DTO/VerifySmsDTO.dart';
-import 'package:link_shortener_mobile/Providers/AuthService.dart';
+import 'package:link_shortener_mobile/Providers/Services/AuthService.dart';
 import 'package:link_shortener_mobile/Views/MainView.dart';
 import 'package:link_shortener_mobile/Views/SplashView.dart';
+import 'package:link_shortener_mobile/Widgets/SmsVerifyWidget.dart';
 import 'package:provider/provider.dart';
 
 import '../Views/RegisterView.dart';
@@ -139,7 +140,9 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> verifyPhoneNumber(BuildContext context, String phone_number,
-      {required bool isRegister, bool resend = false, int? resendToken}) async {
+      {required Function(String) onSuccess,
+      bool resend = false,
+      int? resendToken}) async {
     await resetState();
 
     isLoading = true;
@@ -150,19 +153,22 @@ class AuthProvider extends ChangeNotifier {
       phoneNumber: phone_number,
       verificationCompleted: (PhoneAuthCredential credential) {
         print("completed");
-        if (isRegister) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => RegisterView(phoneNumber: phone_number),
-            ),
-          );
-        } else {
-          WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-            Provider.of<AuthProvider>(context, listen: false)
-                .loginWithPhone(context, phone_number);
-          });
-        }
+        onSuccess(phone_number);
+
+        // if (isRegister) {
+        //   Navigator.push(
+        //     context,
+        //     MaterialPageRoute(
+        //       builder: (context) => RegisterView(phoneNumber: phone_number),
+        //     ),
+        //   );
+        // } else {
+        //   WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+        //     Provider.of<AuthProvider>(context, listen: false)
+        //         .loginWithPhone(context, phone_number);
+        //   });
+        // }
+
         notifyListeners();
       },
       verificationFailed: (FirebaseAuthException e) {
@@ -184,25 +190,12 @@ class AuthProvider extends ChangeNotifier {
                 phoneNumber: phone_number,
                 resendToken: resendToken,
                 verifyId: verificationId,
-                isRegister: isRegister,
+                onSuccess: onSuccess,
               ),
             ),
           ).then((value) {
             if (value == true) {
-              if (isRegister) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        RegisterView(phoneNumber: phone_number),
-                  ),
-                );
-              } else {
-                WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-                  Provider.of<AuthProvider>(context, listen: false)
-                      .loginWithPhone(context, phone_number);
-                });
-              }
+              onSuccess(phone_number);
             }
           });
         }

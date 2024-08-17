@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:link_shortener_mobile/Models/DTO/ErrorResponseDTO.dart';
-import 'package:link_shortener_mobile/Providers/ShortLinkService.dart';
+import 'package:link_shortener_mobile/Providers/Services/ShortLinkService.dart';
 
 class ShortLinkLogsProvider extends ChangeNotifier {
   final _service = ShortLinkService();

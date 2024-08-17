@@ -7,7 +7,7 @@ import 'dart:convert';
 
 import 'package:link_shortener_mobile/Models/DTO/UserRegisterRequestDTO.dart';
 
-import '../Models/User.dart';
+import '../../Models/User.dart';
 
 const String BASE_URL = "https://10.0.2.2:7031";
 

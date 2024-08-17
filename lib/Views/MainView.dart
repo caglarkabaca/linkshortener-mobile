@@ -12,6 +12,8 @@ import 'package:link_shortener_mobile/Providers/ShortLinkProvider.dart';
 import 'package:link_shortener_mobile/Providers/ThemeProvider.dart';
 import 'package:link_shortener_mobile/Views/DetailView.dart';
 import 'package:link_shortener_mobile/Views/LoginView.dart';
+import 'package:link_shortener_mobile/Widgets/InputField.dart';
+import 'package:link_shortener_mobile/Widgets/SubmitButton.dart';
 import 'package:numeral/numeral.dart';
 import 'package:provider/provider.dart';
 
