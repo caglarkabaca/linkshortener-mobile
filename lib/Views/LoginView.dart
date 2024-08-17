@@ -33,7 +33,7 @@ class _LoginViewState extends State<LoginView> {
           color: Colors.transparent,
           child: TabBar(
             tabs: [
-              Tab(icon: Icon(Icons.email)),
+              Tab(icon: Icon(Icons.password)),
               Tab(icon: Icon(Icons.phone)),
             ],
           ),
